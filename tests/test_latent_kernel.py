@@ -6,7 +6,7 @@ import numpy
 import pandas
 
 import xtuples as xt
-import xfactors as xf
+import xjd
 
 
 # import jax.config
@@ -15,9 +15,9 @@ import xfactors as xf
 from sklearn.cluster import KMeans
 
 def test_latent_kernel() -> bool:
-    xf.utils.rand.reset_keys()
+    xjd.utils.rand.reset_keys()
 
-    ds = xf.utils.dates.starting(datetime.date(2020, 1, 1), 100)
+    ds = xjd.utils.dates.starting(datetime.date(2020, 1, 1), 100)
 
     N_COLS = 5
     N_CLUSTERS = 3
@@ -44,8 +44,8 @@ def test_latent_kernel() -> bool:
         initial={},
     )
 
-    # mu = xf.utils.rand.orthogonal(N_FACTORS)[..., :N_CLUSTERS]
-    mu = xf.utils.rand.gaussian((N_FACTORS, N_CLUSTERS,))
+    # mu = xjd.utils.rand.orthogonal(N_FACTORS)[..., :N_CLUSTERS]
+    mu = xjd.utils.rand.gaussian((N_FACTORS, N_CLUSTERS,))
     
     betas = numpy.add(
         numpy.array([
@@ -55,14 +55,14 @@ def test_latent_kernel() -> bool:
             ]
             for f in FACTORS
         ]),
-        xf.utils.rand.gaussian((N_FACTORS, N_VARIABLES,)) / 10
+        xjd.utils.rand.gaussian((N_FACTORS, N_VARIABLES,)) / 10
     ).T
     cov = numpy.matmul(
         numpy.matmul(betas, numpy.eye(N_FACTORS)), betas.T
     )
     cov = numpy.divide(
         cov, 
-        xf.expand_dims_like(
+        xjd.expand_dims_like(
             cov.sum(axis=1), axis=1, like=cov
         ),
         # numpy.resize(
@@ -71,7 +71,7 @@ def test_latent_kernel() -> bool:
         # )
     )
 
-    vs = xf.utils.rand.v_mv_gaussian(
+    vs = xjd.utils.rand.v_mv_gaussian(
         100,
         mu=numpy.zeros((N_VARIABLES,)), 
         cov=cov
@@ -80,7 +80,7 @@ def test_latent_kernel() -> bool:
 
     data = (
         pandas.DataFrame({
-            f: xf.utils.dates.dated_series({
+            f: xjd.utils.dates.dated_series({
                 d: v for d, v in zip(ds, fvs)
                 #
             })
@@ -88,31 +88,31 @@ def test_latent_kernel() -> bool:
         }),
     )
     
-    model = xf.Model()
+    model = xjd.Model()
 
     model, loc_data = model.add_node(
-        xf.inputs.dfs.DataFrame_Wide(),
+        xjd.inputs.dfs.DataFrame_Wide(),
         input=True,
     )
     model, loc_cov = model.add_node(
-        xf.cov.vanilla.Cov(data=loc_data.result()),
+        xjd.cov.vanilla.Cov(data=loc_data.result()),
         static=True,
     )
     model, loc_latent = model.add_node(
-        xf.params.latent.Latent(
+        xjd.params.latent.Latent(
             n=2,
             axis=1,
             data=loc_data.result(),
         )
     )
     model, loc_kernel = model.add_node(
-        xf.reg.gp.GP_RBF(
+        xjd.reg.gp.GP_RBF(
             # sigma=1.,
             features=loc_latent.param(),
         )
     )
     model = model.add_node(
-        xf.constraints.loss.MSE(
+        xjd.constraints.loss.MSE(
             l=loc_cov.result(),
             r=loc_kernel.result(),
         ),
@@ -141,7 +141,7 @@ def test_latent_kernel() -> bool:
         clusters=CLUSTER_MAP,
     )
 
-    xf.utils.tests.assert_is_close(
+    xjd.utils.tests.assert_is_close(
         cov,
         cov_res,
         True,

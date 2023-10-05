@@ -21,13 +21,13 @@ import jaxopt
 import optax
 
 import xtuples as xt
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Weights_Constant(typing.NamedTuple):
     """
     """
@@ -36,14 +36,14 @@ class Weights_Constant(typing.NamedTuple):
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Weights_Constant, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Weights_Constant, tuple, xjd.SiteValue]: ...
     
     def init_params(self, model, params):
         return self, jax.numpy.ones(self.shape) * self.v
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Weights_Normal(typing.NamedTuple):
     """
     """
@@ -51,14 +51,14 @@ class Weights_Normal(typing.NamedTuple):
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Weights_Normal, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Weights_Normal, tuple, xjd.SiteValue]: ...
     
     def init_params(self, model, params):
         return self, utils.rand.gaussian(self.shape)
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Weights_Orthogonal(typing.NamedTuple):
     """
     """
@@ -66,8 +66,8 @@ class Weights_Orthogonal(typing.NamedTuple):
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Weights_Orthogonal, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Weights_Orthogonal, tuple, xjd.SiteValue]: ...
     
     def init_params(self, model, params):
         return self, utils.rand.orthogonal(self.shape)
@@ -82,14 +82,14 @@ class Latent(typing.NamedTuple):
 
     n: int
     axis: int
-    data: xf.Location
+    data: xjd.Location
     # TODO init: collections.abc.Iterable = None
 
     # kwargs for specifying the init - orthogonal, gaussian, etc.
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Latent, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Latent, tuple, xjd.SiteValue]:
         axis = self.axis
         obj = self.data.site().access(model)
         shape_latent = (
@@ -103,8 +103,8 @@ class Latent(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None

@@ -6,7 +6,7 @@ import numpy
 import pandas
 
 import xtuples as xt
-import xfactors as xf
+import xjd
 
 
 import optax
@@ -17,7 +17,7 @@ import optax
 from sklearn.cluster import KMeans
 
 def test_gmm() -> bool:
-    xf.utils.rand.reset_keys()
+    xjd.utils.rand.reset_keys()
 
     N_COLS = 5
     N_CLUSTERS = 3
@@ -27,10 +27,10 @@ def test_gmm() -> bool:
         numpy.ones(N_COLS) * -1,
         numpy.zeros(N_COLS),
         numpy.ones(N_COLS) * 1,
-    ]) + (xf.utils.rand.gaussian((N_CLUSTERS, N_COLS,)) / 2)
+    ]) + (xjd.utils.rand.gaussian((N_CLUSTERS, N_COLS,)) / 2)
 
     vs = numpy.concatenate([
-        mu[cluster] + (xf.utils.rand.gaussian(
+        mu[cluster] + (xjd.utils.rand.gaussian(
             (N_VARIABLES, N_COLS)
             #
         ) / 2)
@@ -48,24 +48,24 @@ def test_gmm() -> bool:
         }),
     )
 
-    model = xf.Model()
+    model = xjd.Model()
     
     model, loc_data = model.add_node(
-        xf.inputs.dfs.DataFrame_Wide(),
+        xjd.inputs.dfs.DataFrame_Wide(),
         input=True,
     )
     model, loc_mu = model.add_node(
-        xf.params.random.Gaussian(
+        xjd.params.random.Gaussian(
             shape=(N_CLUSTERS, N_COLS,),
         )
     )
     model, loc_cov = model.add_node(
-        xf.params.random.Orthogonal(
+        xjd.params.random.Orthogonal(
             shape=(N_CLUSTERS, N_COLS, N_COLS,),
         )
     )
     model, loc_gmm = model.add_node(
-        xf.clustering.gmm.Likelihood_Separability(
+        xjd.clustering.gmm.Likelihood_Separability(
             k=N_CLUSTERS,
             data=loc_data.result(),
             mu=loc_mu.param(),
@@ -75,25 +75,25 @@ def test_gmm() -> bool:
     )
     model = (
         model.add_node(
-            xf.constraints.loss.Maximise(
+            xjd.constraints.loss.Maximise(
                 data=loc_gmm.result(1),
             ),
             constraint=True,
         )
         .add_node(
-            xf.constraints.loss.Maximise(
+            xjd.constraints.loss.Maximise(
                 data=loc_gmm.result(2),
             ),
             constraint=True,
         )
         .add_node(
-            xf.constraints.linalg.VOrthogonal(
+            xjd.constraints.linalg.VOrthogonal(
                 data=loc_cov.param()
             ),
             constraint=True,
         )
         .add_node(
-            xf.constraints.linalg.L1_MM_Diag(
+            xjd.constraints.linalg.L1_MM_Diag(
                 raw=loc_cov.param()
             ),
             constraint=True,
@@ -136,13 +136,13 @@ def test_gmm() -> bool:
     
     labels, order = (
         xt.iTuple([int(l) for l in labels])
-        .pipe(xf.clustering.kmeans.reindex_labels)
+        .pipe(xjd.clustering.kmeans.reindex_labels)
     )
     mu_ = [mu_[i] for i in order]
 
     k_means = KMeans(n_clusters=3, random_state=69).fit(vs)
     sk_labels, sk_order = xt.iTuple(k_means.labels_).pipe(
-        xf.clustering.kmeans.reindex_labels
+        xjd.clustering.kmeans.reindex_labels
     )
 
     mu_ = numpy.round(mu_, 3)
@@ -154,7 +154,7 @@ def test_gmm() -> bool:
         if l != sk_l
     }
 
-    xf.utils.tests.assert_is_close(
+    xjd.utils.tests.assert_is_close(
         mu_,
         mu,
         True,

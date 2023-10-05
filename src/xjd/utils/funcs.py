@@ -51,14 +51,26 @@ def intspace(start, end, steps = None):
 
 # ---------------------------------------------------------------
 
-def set_signs_to(X, axis, signs, i = 0):
+def take_axis_at(X, axis, i = 0):
     axis_size = X.shape[axis]
-    i_shape = xt.iTuple(enumerate(X.shape))
-    slice = jax.numpy.ravel(
+    return jax.numpy.ravel(
         jax.numpy.take(X, numpy.array(list(range(
             axis_size
         ))), axis = axis)
     )[i * axis_size: (i + 1) * axis_size]
+
+def set_signs_to(X, axis, signs, i = 0):
+    """
+    >>> v = numpy.array([[-1., 1., -1.], [2., -1., 2.]])
+    >>> set_signs_to(v, 0, [1, -1])
+    Array([[ 1., -1.,  1.],
+           [-2.,  1., -2.]], dtype=float32)
+    >>> set_signs_to(v, 1, [-1., -1., 1])
+    Array([[-1., -1.,  1.],
+           [ 2.,  1., -2.]], dtype=float32)
+    """
+    i_shape = xt.iTuple(enumerate(X.shape))
+    slice = take_axis_at(X, axis, i = i)
     X_signs = jax.numpy.sign(slice)
     scale = mul(X_signs, numpy.array(signs))
     for dim, size in i_shape[axis + 1:]:
@@ -67,6 +79,9 @@ def set_signs_to(X, axis, signs, i = 0):
         scale = shapes.expand_dims(scale, 0, size)
     return mul(X, scale)
 
+def match_signs_to(X, axis, i = 0):
+    signs = jax.numpy.sign(take_axis_at(X, axis, i=i))
+    return set_signs_to(X, axis, signs=signs, i=i)
 
 # ---------------------------------------------------------------
 
@@ -134,7 +149,18 @@ def loss_eigenvec(cov, w, eigvals):
     return _mse + _norm
 
 # NOTE: assumes eigvals already positive constrained
-def loss_eigenvec_norm(w, eigvals):
+def loss_eigvec_diag(w, eigvals):
+
+    scale = (
+        eigvals * jax.numpy.eye(eigvals.shape[0])
+    )
+
+    cov = jax.numpy.matmul(jax.numpy.matmul(w, scale), w.T)
+
+    return loss_eigenvec(cov, w, eigvals)
+
+# NOTE: assumes eigvals already positive constrained
+def loss_eigenvec_norm(w, eigvals, agg = jax.numpy.sum):
     norm = mm(shapes.transpose(w), w)
     norm_sq = sq(norm)
 
@@ -143,10 +169,10 @@ def loss_eigenvec_norm(w, eigvals):
     # norm_unit = (2 / (1 + exp(-norm_sq))) - 1
     norm_unit = jax.numpy.clip(norm_sq, a_max=1.)
 
-    mul = mul(
+    _mul = mul(
         norm_unit, 
         1 + (
-            jax.numpy.eye(norm.shape[-1]) * -2
+            jax.numpy.eye(norm.shape[1]) * -2
         ),
     )
 
@@ -155,7 +181,7 @@ def loss_eigenvec_norm(w, eigvals):
     # else:
     #     eigsum = eigvals.sum()
 
-    return mm(mul, eigvals).mean()
+    return agg(mm(_mul, eigvals))
 
 # ---------------------------------------------------------------
 

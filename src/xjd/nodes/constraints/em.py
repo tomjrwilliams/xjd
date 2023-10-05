@@ -22,28 +22,28 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class EM(typing.NamedTuple):
     
-    param: xf.Location
-    optimal: xf.Location # optimal at this step from em algo
+    param: xjd.Location
+    optimal: xjd.Location # optimal at this step from em algo
 
     cut_tree: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[EM, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[EM, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         param = self.param.access(state)
@@ -58,22 +58,22 @@ class EM(typing.NamedTuple):
         )
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class EM_MatMul(typing.NamedTuple):
     
-    raw: xf.Location
-    optimal: xf.Location # optimal at this step from em algo
+    raw: xjd.Location
+    optimal: xjd.Location # optimal at this step from em algo
 
     cut_tree: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[EM_MatMul, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[EM_MatMul, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         raw = self.raw.access(state)

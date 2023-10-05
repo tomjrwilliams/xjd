@@ -23,7 +23,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 # ---------------------------------------------------------------
@@ -37,15 +37,15 @@ from ... import utils
 class NDArray(typing.NamedTuple):
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[NDArray, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[NDArray, tuple, xjd.SiteValue]:
         assert isinstance(data, numpy.ndarray), type(data)
         return self, data.shape, ()
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert isinstance(data, numpy.ndarray), type(data)

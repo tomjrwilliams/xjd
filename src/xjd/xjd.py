@@ -423,7 +423,7 @@ def order_nodes(model: Model) -> Model:
     children = {
         site.loc.site(): xt.iTuple.from_values(
             access_sites(site.node, model)
-        ).map(lambda s: s.loc.site()).sort(
+        ).map(lambda s: s.loc.site()).sortby(
             lambda s: s.i
         ) for site in model.sites
     }

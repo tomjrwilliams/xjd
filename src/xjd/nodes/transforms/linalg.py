@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 from .. import params
 
@@ -34,22 +34,22 @@ from .. import params
 
 # NOTE: assumes eigvals already positive constrained
 # also eigval (not singular value, so no need to square)
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Eigen_Cov(typing.NamedTuple):
 
-    eigvals: xf.Loc
-    eigvecs: xf.Loc
+    eigvals: xjd.Loc
+    eigvecs: xjd.Loc
 
     vmax: typing.Optional[float] = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Eigen_Cov, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Eigen_Cov, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         eigvals = self.eigvals.access(state)
@@ -64,7 +64,7 @@ class Eigen_Cov(typing.NamedTuple):
             )
         else:
             scale = (
-                xf.expand_dims(
+                xjd.expand_dims(
                     eigvals, 1, 1
                 ) * jax.numpy.eye(eigvals.shape[-1])
             )

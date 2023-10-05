@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from .. import pca
 
 # ---------------------------------------------------------------

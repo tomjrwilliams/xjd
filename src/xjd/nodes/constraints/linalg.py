@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 # ---------------------------------------------------------------
@@ -30,22 +30,22 @@ from ... import utils
 small = 10 ** -4
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Eigenvec(typing.NamedTuple):
     
-    cov: xf.Location
-    weights: xf.Location
-    eigvals: xf.Location
+    cov: xjd.Location
+    weights: xjd.Location
+    eigvals: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Eigenvec, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Eigenvec, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         weights = self.weights.access(state)
@@ -55,22 +55,22 @@ class Eigenvec(typing.NamedTuple):
             weights = weights.T
         return utils.funcs.loss_eigenvec(cov, weights, eigvals)
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Eigenvec_Cov(typing.NamedTuple):
     
-    eigvals: xf.Location
-    weights: xf.Location
+    eigvals: xjd.Location
+    weights: xjd.Location
 
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Eigenvec, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Eigenvec, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         weights = self.weights.access(state)
@@ -78,25 +78,25 @@ class Eigenvec_Cov(typing.NamedTuple):
         if self.T:
             weights = weights.T
         if len(weights.shape) == 3:
-            eigvals = xf.expand_dims(eigvals, -1, 1)
+            eigvals = xjd.expand_dims(eigvals, -1, 1)
         return utils.funcs.loss_eigenvec_norm(
             weights, eigvals
         )
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Orthonormal(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Orthonormal, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Orthonormal, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         X = self.data.access(state)
@@ -105,20 +105,20 @@ class Orthonormal(typing.NamedTuple):
         return utils.funcs.loss_orthonormal(X)
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Orthogonal(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Orthogonal, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Orthogonal, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         X = self.data.access(state)
@@ -127,22 +127,22 @@ class Orthogonal(typing.NamedTuple):
         return utils.funcs.loss_orthogonal(X)
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class VEigenvec(typing.NamedTuple):
     
-    cov: xf.Location
-    weights: xf.Location
-    eigvals: xf.Location
+    cov: xjd.Location
+    weights: xjd.Location
+    eigvals: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VEigenvec, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VEigenvec, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         weights = self.weights.access(state)
@@ -164,20 +164,20 @@ class VEigenvec(typing.NamedTuple):
             ).pipe(list)
         ]).sum()
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class VOrthogonal(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VOrthogonal, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VOrthogonal, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         X = self.data.access(state)
@@ -190,20 +190,20 @@ class VOrthogonal(typing.NamedTuple):
         ]).sum()
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class VOrthonormal(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VOrthonormal, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VOrthonormal, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         X = self.data.access(state)
@@ -217,20 +217,20 @@ class VOrthonormal(typing.NamedTuple):
         # return jax.vmap(utils.funcs.loss_orthonormal)(X).sum()
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Diagonal(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VDiagonal, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VDiagonal, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         X = self.data.access(state)
@@ -238,20 +238,20 @@ class Diagonal(typing.NamedTuple):
             X = X.T
         return utils.funcs.loss_diag(X)
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class VDiagonal(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VDiagonal, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VDiagonal, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         X = self.data.access(state)
@@ -259,20 +259,20 @@ class VDiagonal(typing.NamedTuple):
             X = X.T
         return jax.vmap(utils.funcs.loss_diag)(X).sum()
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class WtSW(typing.NamedTuple):
     
-    W: xf.Loc # eigvec
-    S: xf.Loc # cov
+    W: xjd.Loc # eigvec
+    S: xjd.Loc # cov
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[WtSW, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[WtSW, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         
@@ -285,20 +285,20 @@ class WtSW(typing.NamedTuple):
             res, a_max=0.
         )).sum()
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class XXt_Cov(typing.NamedTuple):
     
-    X: xf.Location
-    cov: xf.Location
+    X: xjd.Location
+    cov: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[XXt_Cov, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[XXt_Cov, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         
@@ -309,21 +309,21 @@ class XXt_Cov(typing.NamedTuple):
 
         return utils.funcs.loss_mse(XXt, cov)
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class XD2Xt_Cov(typing.NamedTuple):
     
-    X: xf.Location
-    D: xf.Location
-    cov: xf.Location
+    X: xjd.Location
+    D: xjd.Location
+    cov: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[XD2Xt_Cov, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[XD2Xt_Cov, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         
@@ -339,19 +339,19 @@ class XD2Xt_Cov(typing.NamedTuple):
 
         return utils.funcs.loss_mse(XXt, cov)
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class EigenVLike(typing.NamedTuple):
     
-    weights: xf.Location
-    factors: xf.Location
+    weights: xjd.Location
+    factors: xjd.Location
 
     eigval_max: bool = True
 
     n_check: typing.Optional[int] = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[EigenVLike, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[EigenVLike, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f_apply(cls, w, f, eigval_max=True):
@@ -374,8 +374,8 @@ class EigenVLike(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
 
@@ -385,24 +385,24 @@ class EigenVLike(typing.NamedTuple):
         return self.f_apply(w, f, eigval_max=self.eigval_max)
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class VEigenVLike(typing.NamedTuple):
     
-    weights: xf.Location
-    factors: xf.Location
+    weights: xjd.Location
+    factors: xjd.Location
 
     eigval_max: bool = True
 
     n_check: typing.Optional[int] = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VEigenVLike, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VEigenVLike, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
 
@@ -420,19 +420,19 @@ class VEigenVLike(typing.NamedTuple):
 def l1_diag_loss(v):
     return jax.numpy.abs(jax.numpy.diag(v)).mean()
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class L1_MM_Diag(typing.NamedTuple):
     
-    raw: xf.Location
+    raw: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[L1_MM_Diag, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[L1_MM_Diag, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         raw = self.raw.access(state)
@@ -446,19 +446,19 @@ class L1_MM_Diag(typing.NamedTuple):
 
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class KernelVsCov(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[KernelVsCov, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[KernelVsCov, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # param weights
@@ -474,20 +474,20 @@ class KernelVsCov(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class MinimiseMMSpread(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[MinimiseMMSpread, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[MinimiseMMSpread, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
@@ -500,26 +500,26 @@ class MinimiseMMSpread(typing.NamedTuple):
         mu = jax.numpy.mean(cov, axis = 0)
         delta = jax.numpy.square(jax.numpy.subtract(
             cov,
-            xf.expand_dims(mu, 0, cov.shape[0])
+            xjd.expand_dims(mu, 0, cov.shape[0])
         )).mean()
         return delta
 
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class MinimiseVariance(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[MinimiseVariance, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[MinimiseVariance, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
@@ -529,20 +529,20 @@ class MinimiseVariance(typing.NamedTuple):
         return var
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class MinimiseZSpread(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[MinimiseZSpread, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[MinimiseZSpread, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
@@ -555,26 +555,26 @@ class MinimiseZSpread(typing.NamedTuple):
         return jax.numpy.square(delta).mean()
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class MaxSpread(typing.NamedTuple):
     
-    data: xf.Location
+    data: xjd.Location
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[MaxSpread, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[MaxSpread, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
         if self.T:
             data = data.T
-        data = xf.expand_dims(data, 0, data.shape[0])
+        data = xjd.expand_dims(data, 0, data.shape[0])
         dataT = jax.numpy.transpose(
             data, (1, 0, 2,)
         )

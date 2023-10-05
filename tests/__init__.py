@@ -10,7 +10,4 @@ import PATHS
 if PATHS.XTUPLES not in sys.path:
     sys.path.append(PATHS.XTUPLES)
 
-if PATHS.XTENORS not in sys.path:
-    sys.path.append(PATHS.XTENORS)
-
 sys.path.append("./src")

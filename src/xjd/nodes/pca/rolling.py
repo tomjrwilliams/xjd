@@ -24,7 +24,7 @@ import optax
 import xtuples as xt
 
 from ... import utils
-from ... import xfactors as xf
+from ... import xjd
 
 from . import vanilla
 
@@ -32,20 +32,20 @@ from . import vanilla
 
 small = 10 ** -4
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PCA_Rolling(typing.NamedTuple):
     
     n: int
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PCA_Rolling, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PCA_Rolling, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
@@ -62,24 +62,24 @@ class PCA_Rolling(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PCA_Rolling_Encoder_Trimmed(typing.NamedTuple):
     
     n: int
-    data: xf.Location
-    weights: xf.OptionalLocation = None
-    loadings: xf.OptionalLocation = None
+    data: xjd.Location
+    weights: xjd.OptionalLocation = None
+    loadings: xjd.OptionalLocation = None
 
     clamp: float = 1.
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PCA_Rolling_Encoder, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PCA_Rolling_Encoder, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert self.weights is not None
@@ -96,7 +96,7 @@ class PCA_Rolling_Encoder_Trimmed(typing.NamedTuple):
         # l = factors
         weights = loadings.zip(weights).mapstar(
             lambda l, w: jax.numpy.multiply(
-                xf.expand_dims(l, 0, 1), w
+                xjd.expand_dims(l, 0, 1), w
             )
         )
         return data.map(
@@ -105,21 +105,21 @@ class PCA_Rolling_Encoder_Trimmed(typing.NamedTuple):
             #
         )
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PCA_Rolling_Encoder(typing.NamedTuple):
     
     n: int
-    data: xf.Location
-    weights: xf.OptionalLocation = None
+    data: xjd.Location
+    weights: xjd.OptionalLocation = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PCA_Rolling_Encoder, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PCA_Rolling_Encoder, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert self.weights is not None
@@ -133,20 +133,20 @@ class PCA_Rolling_Encoder(typing.NamedTuple):
 
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PCA_Rolling_Decoder(typing.NamedTuple):
     
-    factors: xf.Location
-    weights: xf.Location
+    factors: xjd.Location
+    weights: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PCA_Rolling_Decoder, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PCA_Rolling_Decoder, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         weights = xt.ituple(self.weights.access(state))
@@ -159,12 +159,12 @@ class PCA_Rolling_Decoder(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PPCA_Rolling_NegLikelihood(typing.NamedTuple):
     
-    sigma: xf.Location
-    weights: xf.Location
-    cov: xf.Location
+    sigma: xjd.Location
+    weights: xjd.Location
+    cov: xjd.Location
 
     # ---
 
@@ -177,13 +177,13 @@ class PPCA_Rolling_NegLikelihood(typing.NamedTuple):
     # so can be re-used in rolling
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PPCA_Rolling_NegLikelihood, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PPCA_Rolling_NegLikelihood, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -200,13 +200,13 @@ class PPCA_Rolling_NegLikelihood(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PPCA_Rolling_EM(typing.NamedTuple):
     
-    sigma: xf.Location
-    weights: xf.Location
+    sigma: xjd.Location
+    weights: xjd.Location
 
-    cov: xf.Location
+    cov: xjd.Location
 
     # ---
 
@@ -218,13 +218,13 @@ class PPCA_Rolling_EM(typing.NamedTuple):
     # if we want
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PPCA_Rolling_EM, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PPCA_Rolling_EM, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://www.robots.ox.ac.uk/~cvrg/hilary2006/ppca.pdf
@@ -237,7 +237,7 @@ class PPCA_Rolling_EM(typing.NamedTuple):
 
         # use noisy_sgd instead of random
         # if self.random:
-        #     key = xf.get_location(
+        #     key = xjd.get_location(
         #         self.loc.random(), state
         #     )
         #     weights = weights + ((
@@ -277,29 +277,29 @@ class PPCA_Rolling_EM(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PPCA_Rolling_Marginal_Observations(typing.NamedTuple):
     
-    sigma: xf.Location
-    weights: xf.Location
-    encoder: xf.Location
-    data: xf.Location
+    sigma: xjd.Location
+    weights: xjd.Location
+    encoder: xjd.Location
+    data: xjd.Location
 
-    cov: xf.Location
+    cov: xjd.Location
 
     # ---
 
     random: float = 0
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PPCA_Rolling_Marginal_Observations, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PPCA_Rolling_Marginal_Observations, tuple, xjd.SiteValue]: ...
     
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://www.robots.ox.ac.uk/~cvrg/hilary2006/ppca.pdf
@@ -312,7 +312,7 @@ class PPCA_Rolling_Marginal_Observations(typing.NamedTuple):
 
         data = self.data.access(state)
     
-        # N = xf.get_location(self.site_encoder, state).shape[0]
+        # N = xjd.get_location(self.site_encoder, state).shape[0]
 
         # feature * feature
         S = cov
@@ -328,28 +328,28 @@ class PPCA_Rolling_Marginal_Observations(typing.NamedTuple):
         return dist.log_prob(data)
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PPCA_Rolling_Conditional_Latents(typing.NamedTuple):
     
-    sigma: xf.Location
-    weights: xf.Location
-    encoder: xf.Location
-    data: xf.Location
+    sigma: xjd.Location
+    weights: xjd.Location
+    encoder: xjd.Location
+    data: xjd.Location
 
-    cov: xf.Location
+    cov: xjd.Location
 
     # ---
    
     random: float = 0
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PPCA_Rolling_Conditional_Latents, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PPCA_Rolling_Conditional_Latents, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://www.robots.ox.ac.uk/~cvrg/hilary2006/ppca.pdf
@@ -362,7 +362,7 @@ class PPCA_Rolling_Conditional_Latents(typing.NamedTuple):
 
         data = self.data.access(state)
     
-        # N = xf.get_location(self.site_encoder, state).shape[0]
+        # N = xjd.get_location(self.site_encoder, state).shape[0]
 
         # feature * feature
         S = cov

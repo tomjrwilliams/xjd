@@ -23,7 +23,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 # ---------------------------------------------------------------
@@ -52,8 +52,8 @@ class DataFrame_Wide(typing.NamedTuple):
     drop_na_rows: bool = True
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[DataFrame_Wide, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[DataFrame_Wide, tuple, xjd.SiteValue]:
         assert site.loc is not None
         # path[0] = stage, so path[1] = index of data element
 
@@ -72,8 +72,8 @@ class DataFrame_Wide(typing.NamedTuple):
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -167,8 +167,8 @@ class DataFrame_Wide_Rolling(typing.NamedTuple):
     drop_na_rows: bool = True
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[DataFrame_Wide_Rolling, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[DataFrame_Wide_Rolling, tuple, xjd.SiteValue]:
         assert site.loc is not None
         # path[0] = stage, so path[1] = index of data element
 
@@ -204,8 +204,8 @@ class DataFrame_Wide_Rolling(typing.NamedTuple):
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -250,24 +250,24 @@ class DataFrame_Wide_Rolling(typing.NamedTuple):
 
 # ---------------------------------------------------------------
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Slice_DataFrame_Wide_Rolling_Columns(typing.NamedTuple):
 
-    rolling: xf.Location
-    slicing: xf.Location
+    rolling: xjd.Location
+    slicing: xjd.Location
 
     T: bool = False
 
     scale: typing.Optional[typing.Callable] = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[DataFrame_Tall, tuple, xf.SiteValue]: ... 
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[DataFrame_Tall, tuple, xjd.SiteValue]: ... 
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
     
@@ -307,16 +307,16 @@ class DataFrame_Tall(typing.NamedTuple):
     # fields to specify if keep index and ticker map
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[DataFrame_Tall, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[DataFrame_Tall, tuple, xjd.SiteValue]:
         assert site.loc is not None
         # path[0] = stage, so path[1] = index of data element
         return self, data[site.loc.path[1]].values.shape, ()
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None

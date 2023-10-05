@@ -8,7 +8,7 @@ import jax
 import optax
 
 import xtuples as xt
-import xfactors as xf
+import xjd
 
 import optax
 import jaxopt
@@ -17,24 +17,24 @@ import jaxopt
 def order_eig(evals, evecs):
     order = numpy.flip(numpy.argsort(evals))
     evecs = evecs[..., order]
-    evecs = xf.utils.funcs.set_signs_to(
-        evecs, 0, numpy.ones(evecs.shape[0])
+    evecs = xjd.utils.funcs.set_signs_to(
+        evecs, 1, numpy.ones(evecs.shape[1])
     )
     evals = evals[order]
     return evals, evecs
 
 def test_eig(iters=2500) -> bool:
-    xf.utils.rand.reset_keys()
+    xjd.utils.rand.reset_keys()
 
-    eigvals = jax.numpy.square(xf.utils.rand.gaussian((5,)))
+    eigvals = jax.numpy.square(xjd.utils.rand.gaussian((5,)))
 
     f_loss= functools.partial(
-        xf.utils.funcs.loss_eigenvec_norm,
+        xjd.utils.funcs.loss_eigvec_diag,
         eigvals=eigvals
     )
-    # f_loss = lambda w_e: xf.utils.funcs.loss_eigvec_diag(*w_e)
+    # f_loss = lambda w_e: xjd.utils.funcs.loss_eigvec_diag(*w_e)
 
-    w = xf.utils.rand.gaussian((5, 5,))
+    w = xjd.utils.rand.gaussian((5, 5,))
 
     opt = optax.adam(0.01)
     solver = jaxopt.OptaxSolver(
@@ -77,14 +77,14 @@ def test_eig(iters=2500) -> bool:
     print(numpy.round(eigvals, 2))
     print(numpy.round(evals, 2))
 
-    xf.utils.tests.assert_is_close(
+    xjd.utils.tests.assert_is_close(
         eigvals,
         evals,
         True,
         atol=0.2,
     )
 
-    xf.utils.tests.assert_is_close(
+    xjd.utils.tests.assert_is_close(
         w,
         evecs,
         True,

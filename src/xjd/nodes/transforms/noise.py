@@ -23,7 +23,7 @@ import optax
 import xtuples as xt
 
 from ... import utils
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
@@ -32,25 +32,25 @@ mm = jax.numpy.matmul
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Diagonal_Gaussian(typing.NamedTuple):
     
-    data: xf.Loc
+    data: xjd.Loc
 
-    eigval: xf.Loc
-    eigvec: xf.Loc
+    eigval: xjd.Loc
+    eigvec: xjd.Loc
 
     scale: float = 1
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Diagonal_Gaussian, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Diagonal_Gaussian, tuple, xjd.SiteValue]: ...
     
     # Fx + Bu
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         
@@ -69,7 +69,7 @@ class Diagonal_Gaussian(typing.NamedTuple):
         )
         noise = noise * jax.numpy.sqrt(eigval)
 
-        noise = xf.expand_dims(noise, -1, 1)
+        noise = xjd.expand_dims(noise, -1, 1)
 
         noise = jax.numpy.matmul(
             utils.shapes.transpose(eigvec), 

@@ -23,7 +23,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 from .. import cov
@@ -37,8 +37,8 @@ from .. import cov
 class GP_RBF(typing.NamedTuple):
 
     # sigma: float
-    features: xf.Location
-    # data: xf.Location
+    features: xjd.Location
+    # data: xjd.Location
 
     # optional weights?
     # optional mean
@@ -49,8 +49,8 @@ class GP_RBF(typing.NamedTuple):
     # if mean provided, assert mean.shape == n
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[GP_RBF, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[GP_RBF, tuple, xjd.SiteValue]:
         return self, (), (
             jax.numpy.ones(1),
             jax.numpy.ones(1),
@@ -58,8 +58,8 @@ class GP_RBF(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
 
@@ -76,7 +76,7 @@ class GP_RBF(typing.NamedTuple):
 
         # assert data.shape[1] == n_variables
 
-        features_matrix = xf.expand_dims(
+        features_matrix = xjd.expand_dims(
             features, axis = 0, size = features.shape[0]
         )
 
@@ -114,16 +114,16 @@ class GP_Kernel_Sigmoid(typing.NamedTuple):
 
     sigma: float
     # or variance?
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[GP_Kernel_Sigmoid, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[GP_Kernel_Sigmoid, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
@@ -135,16 +135,16 @@ class GP_Kernel_Sigmoid(typing.NamedTuple):
 class GP_Kernel_SquaredExp(typing.NamedTuple):
 
     length_scale: float
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[GP_Kernel_SquaredExp, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[GP_Kernel_SquaredExp, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
@@ -154,11 +154,11 @@ class GP_Kernel_SquaredExp(typing.NamedTuple):
 class GP_Kernel_OU(typing.NamedTuple):
 
     length_scale: float
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[GP_Kernel_OU, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[GP_Kernel_OU, tuple, xjd.SiteValue]: ...
     
     @classmethod
     def f(cls, features_l, features_r, sigma, l):
@@ -171,8 +171,8 @@ class GP_Kernel_OU(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
@@ -184,16 +184,16 @@ class GP_Kernel_OU(typing.NamedTuple):
 class GP_Kernel_RationalQuadratic(typing.NamedTuple):
 
     length_scale: float
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[GP_Kernel_RationalQuadratic, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[GP_Kernel_RationalQuadratic, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self

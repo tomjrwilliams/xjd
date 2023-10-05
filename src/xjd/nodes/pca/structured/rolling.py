@@ -24,7 +24,7 @@ import optax
 import xtuples as xt
 
 from .... import utils
-from .... import xfactors as xf
+from .... import xjd
 
 # ---------------------------------------------------------------
 
@@ -36,13 +36,13 @@ from .... import xfactors as xf
 # with 1 in the features (tickers) in that sector, zero elsewhere
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PCA_Rolling_LatentWeightedMean_MSE(typing.NamedTuple):
     
     # sites
-    weights_pca: xf.Location
-    weights_structure: xf.Location
-    latents: xf.Location
+    weights_pca: xjd.Location
+    weights_structure: xjd.Location
+    latents: xjd.Location
 
     # assume feature * factor minimum
 
@@ -50,8 +50,8 @@ class PCA_Rolling_LatentWeightedMean_MSE(typing.NamedTuple):
     share_factors: bool = True
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PCA_Rolling_LatentWeightedMean_MSE, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PCA_Rolling_LatentWeightedMean_MSE, tuple, xjd.SiteValue]: ...
 
     def f_apply(
         self, weights_pca, weights_structure, latents, 
@@ -62,18 +62,18 @@ class PCA_Rolling_LatentWeightedMean_MSE(typing.NamedTuple):
 
         if self.share_factors:
             #  and not self.bias_factor:
-            weights_structure = xf.expand_dims(
+            weights_structure = xjd.expand_dims(
                 weights_structure, 0, weights_pca.shape[1]
             )
         # elif self.share_factors and self.bias_factor:
         #     dense_features = weights_structure.sum(axis=0)
         #     weights_structure = jax.numpy.concatenate([
-        #         xf.expand_dims(xf.expand_dims(
+        #         xjd.expand_dims(xjd.expand_dims(
         #             dense_features / dense_features.sum(),
         #             0,
         #             weights_structure.shape[0],
         #         ), 0, 1),
-        #         xf.expand_dims(
+        #         xjd.expand_dims(
         #             weights_structure, 0, weights_pca.shape[1] - 1
         #         ),
         #     ])
@@ -86,7 +86,7 @@ class PCA_Rolling_LatentWeightedMean_MSE(typing.NamedTuple):
 
         weights_pca_agg = jax.numpy.multiply(
             # features * n_latent_features, n_factors
-            xf.expand_dims(weights_pca, 1, latents.shape[1]),
+            xjd.expand_dims(weights_pca, 1, latents.shape[1]),
             jax.numpy.transpose(weights_structure, (2, 1, 0,))
             #
         ).sum(axis=0).T
@@ -96,8 +96,8 @@ class PCA_Rolling_LatentWeightedMean_MSE(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
 

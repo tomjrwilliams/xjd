@@ -23,7 +23,7 @@ import optax
 import xtuples as xt
 
 from ... import utils
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
@@ -31,22 +31,22 @@ mm = jax.numpy.matmul
 
 # ---------------------------------------------------------------
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Neg_Gaussian(typing.NamedTuple):
     
-    data: xf.Loc
-    cov: xf.Loc
+    data: xjd.Loc
+    cov: xjd.Loc
 
     T: bool = False
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Neg_Gaussian, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Neg_Gaussian, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         
@@ -58,10 +58,10 @@ class Neg_Gaussian(typing.NamedTuple):
         # eigvecs =self.eigvecs.access(state)
 
         if len(X.shape) < 3:
-            X = xf.expand_dims(X, -1, 1)
+            X = xjd.expand_dims(X, -1, 1)
 
         if len(cov.shape) < 3:
-            cov = xf.expand_dims(cov, 0, X.shape[0])
+            cov = xjd.expand_dims(cov, 0, X.shape[0])
 
         likelihood = utils.funcs.likelihood_gaussian(
             data=X,
@@ -75,7 +75,7 @@ class Neg_Gaussian(typing.NamedTuple):
         # log_likelihood = utils.funcs.log_likelihood_gaussian_diag(
         #     data=X[1:, :, :],
         #     mu=FX,
-        #     eigvals=xf.expand_dims(
+        #     eigvals=xjd.expand_dims(
         #         eigval[1:, ...], -1, 1
         #     ),
         #     eigvecs=eigvec[1:, ...],

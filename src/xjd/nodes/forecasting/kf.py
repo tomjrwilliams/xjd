@@ -23,7 +23,7 @@ import optax
 import xtuples as xt
 
 from ... import utils
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
@@ -32,26 +32,26 @@ mm = jax.numpy.matmul
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class State_Prediction(typing.NamedTuple):
     
-    transition: xf.Loc
-    state: xf.Loc
+    transition: xjd.Loc
+    state: xjd.Loc
 
-    noise: xf.Loc
+    noise: xjd.Loc
 
-    input: xf.OptionalLoc = None
-    control: xf.OptionalLoc = None
+    input: xjd.OptionalLoc = None
+    control: xjd.OptionalLoc = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[State_Prediction, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[State_Prediction, tuple, xjd.SiteValue]: ...
     
     # Fx + Bu
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         
@@ -64,7 +64,7 @@ class State_Prediction(typing.NamedTuple):
         # transition = n_features, n_features
 
         if len(X.shape) < 3:
-            X = xf.expand_dims(X, -1, 1)
+            X = xjd.expand_dims(X, -1, 1)
 
         # should now treat state[0] as batch dim
         # and multiply in from the right
@@ -95,7 +95,7 @@ class State_Prediction(typing.NamedTuple):
         B = self.control.access(state)
 
         U = self.input.access(state)
-        U = xf.expand_dims(U, -1, 1)
+        U = xjd.expand_dims(U, -1, 1)
 
         BU = mm(B, U)
 
@@ -112,25 +112,25 @@ class State_Prediction(typing.NamedTuple):
             res - X[..., 0]
         )
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Cov_Prediction(typing.NamedTuple):
     
-    transition: xf.Loc
-    cov: xf.Loc
+    transition: xjd.Loc
+    cov: xjd.Loc
     # ie. previous cov prediction
 
-    noise: xf.Loc
+    noise: xjd.Loc
     # process noise covariance
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Cov_Prediction, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Cov_Prediction, tuple, xjd.SiteValue]: ...
     
     # FPFt + Q
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         F = self.transition.access(state)
@@ -152,30 +152,30 @@ class Cov_Prediction(typing.NamedTuple):
         )
 
         return jax.numpy.concatenate([
-            # xf.expand_dims(noise, 0, 1),
+            # xjd.expand_dims(noise, 0, 1),
             P[:1, :, :],
-            res + xf.expand_dims(noise, 0, P_trim.shape[0])
+            res + xjd.expand_dims(noise, 0, P_trim.shape[0])
         ]), P[1:, ...] - res
 
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class State_Innovation(typing.NamedTuple):
     
-    data: xf.Loc # observations
-    observation: xf.Loc # obs model
-    state: xf.Loc # from the predict step
+    data: xjd.Loc # observations
+    observation: xjd.Loc # obs model
+    state: xjd.Loc # from the predict step
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[State_Innovation, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[State_Innovation, tuple, xjd.SiteValue]: ...
     
     # z - Hx
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
 
@@ -184,35 +184,35 @@ class State_Innovation(typing.NamedTuple):
         X = self.state.access(state)
 
         if len(X.shape) < 3:
-            X = xf.expand_dims(X, -1, 1)
+            X = xjd.expand_dims(X, -1, 1)
 
         # assert has batch dim, state.shape[2] == 1
         assert len(X.shape) == 3, X.shape
 
-        data = xf.expand_dims(data, -1, 1)
+        data = xjd.expand_dims(data, -1, 1)
 
         return data - jax.numpy.matmul(H, X)[:-1, :, :]
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Cov_Innovation(typing.NamedTuple):
     
-    observation: xf.Loc
-    cov: xf.Loc # from the predict step
-    noise: xf.Loc # observation noise covariance
+    observation: xjd.Loc
+    cov: xjd.Loc # from the predict step
+    noise: xjd.Loc # observation noise covariance
 
     # observation_noise: float = 0.01
 
     vmax: float = 10.
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Cov_Innovation, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Cov_Innovation, tuple, xjd.SiteValue]: ...
     
     # HPHt + R
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         H = self.observation.access(state)
@@ -234,7 +234,7 @@ class Cov_Innovation(typing.NamedTuple):
 
         res = mm(
             H, mm(P, H.T)
-        ) + xf.expand_dims(noise, 0, P.shape[0])
+        ) + xjd.expand_dims(noise, 0, P.shape[0])
 
         # if (jax.numpy.abs(res) > 10 ** 5).any():
         #     assert False, dict(
@@ -250,24 +250,24 @@ class Cov_Innovation(typing.NamedTuple):
 small = 10 ** -4
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kalman_Gain(typing.NamedTuple):
     
-    cov: xf.Loc # prediction
-    observation: xf.Loc
-    cov_innovation: xf.Loc
+    cov: xjd.Loc # prediction
+    observation: xjd.Loc
+    cov_innovation: xjd.Loc
 
     # observation_noise: float = 0.01
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kalman_Gain, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kalman_Gain, tuple, xjd.SiteValue]: ...
     
     # PHtS-1
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         P = self.cov.access(state)
@@ -306,22 +306,22 @@ class Kalman_Gain(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class State_Updated(typing.NamedTuple):
     
-    state: xf.Loc # pred
-    kalman_gain: xf.Loc
-    state_innovation: xf.Loc
+    state: xjd.Loc # pred
+    kalman_gain: xjd.Loc
+    state_innovation: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[State_Updated, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[State_Updated, tuple, xjd.SiteValue]: ...
     
     # x + Ky
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         kalman_gain = self.kalman_gain.access(state)
@@ -330,7 +330,7 @@ class State_Updated(typing.NamedTuple):
         X = self.state.access(state)
 
         if len(X.shape) < 3:
-            X = xf.expand_dims(X, -1, 1)
+            X = xjd.expand_dims(X, -1, 1)
 
         return jax.numpy.concatenate([
             (X[:-1, :, :] + mm(
@@ -340,22 +340,22 @@ class State_Updated(typing.NamedTuple):
         ], axis = 0)[..., 0]
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Cov_Updated(typing.NamedTuple):
     
-    kalman_gain: xf.Loc
-    observation: xf.Loc
-    cov: xf.Loc # predicted
+    kalman_gain: xjd.Loc
+    observation: xjd.Loc
+    cov: xjd.Loc # predicted
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Cov_Updated, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Cov_Updated, tuple, xjd.SiteValue]: ...
     
     # (I - KH)P
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         kalman_gain = self.kalman_gain.access(state)
@@ -364,7 +364,7 @@ class Cov_Updated(typing.NamedTuple):
         P = self.cov.access(state)
         # P_trim = P[:-1, :, :]
         
-        I = xf.expand_dims(
+        I = xjd.expand_dims(
             jax.numpy.eye(P.shape[1]), 0, P.shape[0]
         )
 
@@ -375,22 +375,22 @@ class Cov_Updated(typing.NamedTuple):
         # ], axis = 0)
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Residual(typing.NamedTuple):
     
-    data: xf.Loc
-    observation: xf.Loc
-    state: xf.Loc # post update
+    data: xjd.Loc
+    observation: xjd.Loc
+    state: xjd.Loc # post update
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Residual, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Residual, tuple, xjd.SiteValue]: ...
     
     # z - Hx
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
@@ -402,8 +402,8 @@ class Residual(typing.NamedTuple):
         # with markov in the same shape as input
         # ie. without rhs [1] dim (so n_days goes to batch-dim)
 
-        X = xf.expand_dims(X, -1, 1)
-        data = xf.expand_dims(data, -1, 1)
+        X = xjd.expand_dims(X, -1, 1)
+        data = xjd.expand_dims(data, -1, 1)
         
         return data - mm(H, X)[:-1, :, :]
 

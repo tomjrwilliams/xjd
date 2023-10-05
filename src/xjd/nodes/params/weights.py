@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 # ---------------------------------------------------------------
@@ -32,21 +32,21 @@ from ... import utils
 class Gaussian(typing.NamedTuple):
 
     n: int
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Gaussian, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Gaussian, tuple, xjd.SiteValue]:
         shape = (
-            self.data.access(model, into=xf.Site).shape[1],
+            self.data.access(model, into=xjd.Site).shape[1],
             self.n,
         )
         return self, shape, utils.rand.gaussian(shape)
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -59,11 +59,11 @@ class Gaussian(typing.NamedTuple):
 class VGaussian(typing.NamedTuple):
 
     n: int
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VGaussian, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VGaussian, tuple, xjd.SiteValue]:
         shape = (
             self.data.site().access(model).shape.map(
                 lambda s: (s[1], self.n,)
@@ -73,8 +73,8 @@ class VGaussian(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -87,13 +87,13 @@ class VGaussian(typing.NamedTuple):
 class VOrthogonal(typing.NamedTuple):
 
     n: int
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VOrthogonal, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VOrthogonal, tuple, xjd.SiteValue]:
         shape = xt.iTuple(
-            self.data.access(model, into=xf.Site).shape
+            self.data.access(model, into=xjd.Site).shape
         ).map(
             lambda s: (s[1], self.n,)
         )
@@ -103,8 +103,8 @@ class VOrthogonal(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -120,18 +120,18 @@ class ConcatenateGaussian(typing.NamedTuple):
     data: xt.iTuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[ConcatenateGaussian, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[ConcatenateGaussian, tuple, xjd.SiteValue]:
         data = self.data.map(
-            lambda s: s.access(model, into=xf.Site).shape
+            lambda s: s.access(model, into=xjd.Site).shape
         )
         shape = data.flatten()
         return self, shape, utils.rand.gaussian(shape)
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None

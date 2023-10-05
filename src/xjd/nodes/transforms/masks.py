@@ -22,26 +22,26 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
 # NOTE: works differently to the below?
 # as we just multiply through by the mask?
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Zero(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
     v: numpy.ndarray
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Zero, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Zero, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         return jax.numpy.multiply(
@@ -50,49 +50,49 @@ class Zero(typing.NamedTuple):
         )
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Positive(typing.NamedTuple):
 
-    data: xf.Loc
-    condition: typing.Union[xf.Loc, numpy.ndarray]
+    data: xjd.Loc
+    condition: typing.Union[xjd.Loc, numpy.ndarray]
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Positive, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Positive, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
         data_pos = jax.numpy.abs(data)
-        if isinstance(self.condition, xf.Loc):
+        if isinstance(self.condition, xjd.Loc):
             mask = self.condition.access(state)
         else:
             mask = self.condition
         return jax.numpy.where(mask, data_pos, data)
         
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Negative(typing.NamedTuple):
 
-    data: xf.Loc
-    condition: typing.Union[xf.Loc, numpy.ndarray]
+    data: xjd.Loc
+    condition: typing.Union[xjd.Loc, numpy.ndarray]
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Negative, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Negative, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
         data_neg = -1 * jax.numpy.abs(data)
-        if isinstance(self.condition, xf.Loc):
+        if isinstance(self.condition, xjd.Loc):
             mask = self.condition.access(state)
         else:
             mask = self.condition
@@ -100,32 +100,32 @@ class Negative(typing.NamedTuple):
 
 # ---------------------------------------------------------------
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Where(typing.NamedTuple):
 
-    condition: typing.Union[xf.Loc, numpy.ndarray]
-    x: typing.Union[xf.Loc, numpy.ndarray]
-    y: typing.Union[xf.Loc, numpy.ndarray]
+    condition: typing.Union[xjd.Loc, numpy.ndarray]
+    x: typing.Union[xjd.Loc, numpy.ndarray]
+    y: typing.Union[xjd.Loc, numpy.ndarray]
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Where, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Where, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
-        if isinstance(self.x, xf.Loc):
+        if isinstance(self.x, xjd.Loc):
             x = self.x.access(state)
         else:
             x = self.x
-        if isinstance(self.y, xf.Loc):
+        if isinstance(self.y, xjd.Loc):
             y = self.y.access(state)
         else:
             y = self.y
-        if isinstance(self.condition, xf.Loc):
+        if isinstance(self.condition, xjd.Loc):
             mask = self.condition.access(state)
         else:
             mask = self.condition

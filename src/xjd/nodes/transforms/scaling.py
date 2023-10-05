@@ -22,21 +22,21 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 from .. import params
 
 
 # ---------------------------------------------------------------
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Expit(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Expit, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Expit, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data):
@@ -44,46 +44,46 @@ class Expit(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
         return self.f(self.data.access(state))
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Exp(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Exp, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Exp, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
         return jax.numpy.exp(self.data.access(state))
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class UnitNorm(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     axis: int = -1
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[UnitNorm, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[UnitNorm, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -93,26 +93,26 @@ class UnitNorm(typing.NamedTuple):
         )
         return jax.numpy.divide(
             data, 
-            xf.expand_dims(
+            xjd.expand_dims(
                 norm, self.axis, data.shape[self.axis]
             )
         )
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Softmax(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     axis: int = 0
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Softmax, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Softmax, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -121,22 +121,22 @@ class Softmax(typing.NamedTuple):
         )
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Sq(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     vmin: typing.Optional[float] = None
     vmax: typing.Optional[float] = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Sq, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Sq, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -149,24 +149,24 @@ class Sq(typing.NamedTuple):
 
 # ---------------------------------------------------------------
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Linear1D(typing.NamedTuple):
 
-    a: xf.Loc
-    b: xf.Loc
-    data: xf.Loc
+    a: xjd.Loc
+    b: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Linear1D, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Linear1D, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def add_to_model(
         cls,
         model,
-        data: xf.OptionalLoc = None,
-        a: xf.OptionalLoc = None,
-        b: xf.OptionalLoc = None,
+        data: xjd.OptionalLoc = None,
+        a: xjd.OptionalLoc = None,
+        b: xjd.OptionalLoc = None,
     ):
         assert data is not None
         if a is None:
@@ -182,8 +182,8 @@ class Linear1D(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -193,14 +193,14 @@ class Linear1D(typing.NamedTuple):
             b=self.b.access(state),
         )
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Logistic(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Logistic, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Logistic, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data):
@@ -208,21 +208,21 @@ class Logistic(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
         return self.f(self.data.access(state))
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Sigmoid(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Sigmoid, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Sigmoid, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data):
@@ -230,21 +230,21 @@ class Sigmoid(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
         return self.f(self.data.access(state))
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class CosineKernel(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Sigmoid, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Sigmoid, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data):
@@ -252,22 +252,22 @@ class CosineKernel(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
         return self.f(self.data.access(state))
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class RBFKernel(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Sigmoid, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Sigmoid, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data):
@@ -275,21 +275,21 @@ class RBFKernel(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
         return self.f(self.data.access(state))
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class GaussianKernel(typing.NamedTuple):
 
-    data: xf.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Sigmoid, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Sigmoid, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data):
@@ -297,8 +297,8 @@ class GaussianKernel(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None

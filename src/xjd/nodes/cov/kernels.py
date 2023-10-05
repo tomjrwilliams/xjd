@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 
@@ -37,20 +37,20 @@ from ... import utils
 # TODO: where vector valued, just take the sum over the diff per dim
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Sum(typing.NamedTuple):
 
     kernels: xt.iTuple = xt.iTuple()
-    kernel: typing.Optional[xf.Loc] = None
+    kernel: typing.Optional[xjd.Loc] = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Sum, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Sum, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         if len(self.kernels):
@@ -70,7 +70,7 @@ class Kernel_Sum(typing.NamedTuple):
     
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Product(typing.NamedTuple):
 
     # take others as fields
@@ -79,13 +79,13 @@ class Kernel_Product(typing.NamedTuple):
     c: float
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Product, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Product, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
@@ -94,19 +94,19 @@ class Kernel_Product(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Constant(typing.NamedTuple):
 
     c: float
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Constant, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Constant, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
@@ -115,27 +115,27 @@ class Kernel_Constant(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Linear(typing.NamedTuple):
 
-    a: xf.Loc
-    c: xf.Loc
-    sigma: xf.Loc
-    data: xf.Loc
+    a: xjd.Loc
+    c: xjd.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     sigma_sq: bool = True
 
     # assumed 1D
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Linear, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Linear, tuple, xjd.SiteValue]: ...
     
     @classmethod
     def f(cls, data, a, c, sigma, sigma_sq = True):
 
         diffs = data - c
-        diffs_ = xf.expand_dims(diffs, 0, 1)
+        diffs_ = xjd.expand_dims(diffs, 0, 1)
         # 1, n_points
 
         # scale
@@ -150,8 +150,8 @@ class Kernel_Linear(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         a = self.a.access(state)
@@ -161,24 +161,24 @@ class Kernel_Linear(typing.NamedTuple):
         return self.f(data, a, c, sigma, sigma_sq=self.sigma_sq)
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class VKernel_Linear(typing.NamedTuple):
 
-    a: xf.Loc
-    c: xf.Loc
-    sigma: xf.Loc
-    data: xf.Loc
+    a: xjd.Loc
+    c: xjd.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     sigma_sq: bool = True
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VKernel_Linear, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VKernel_Linear, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         a = self.a.access(state)
@@ -190,31 +190,31 @@ class VKernel_Linear(typing.NamedTuple):
         )
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_VLinear(typing.NamedTuple):
 
-    a: xf.Loc
-    c: xf.Loc
-    sigma: xf.Loc
-    data: xf.Loc
+    a: xjd.Loc
+    c: xjd.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     sigma_sq: bool = True
 
     # assumed 1D
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_VLinear, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_VLinear, tuple, xjd.SiteValue]: ...
     
     @classmethod
     def f(cls, data, a, c, sigma, sigma_sq = True):
 
-        diffs = (xf.expand_dims(data, 0, 1) - (
-            xf.expand_dims(c, 0, 1).T
+        diffs = (xjd.expand_dims(data, 0, 1) - (
+            xjd.expand_dims(c, 0, 1).T
         )).T
         # n_points, n_c
 
-        diffs_ = xf.expand_dims(diffs, 0, diffs.shape[0])
+        diffs_ = xjd.expand_dims(diffs, 0, diffs.shape[0])
 
         diff_prod = (
             diffs_ * jax.numpy.transpose(
@@ -236,8 +236,8 @@ class Kernel_VLinear(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         a = self.a.access(state)
@@ -247,24 +247,24 @@ class Kernel_VLinear(typing.NamedTuple):
         return self.f(data, a, c, sigma, sigma_sq=self.sigma_sq)
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class VKernel_VLinear(typing.NamedTuple):
 
-    a: xf.Loc
-    c: xf.Loc
-    sigma: xf.Loc
-    data: xf.Loc
+    a: xjd.Loc
+    c: xjd.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     sigma_sq: bool = True
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VKernel_VLinear, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VKernel_VLinear, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         a = self.a.access(state)
@@ -280,18 +280,18 @@ class VKernel_VLinear(typing.NamedTuple):
 small = 10 ** -4
 
 # aks squared exponential
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_RadialBasisFunction(typing.NamedTuple):
 
     # NOTE: https://www.cs.toronto.edu/~duvenaud/cookbook/
 
-    sigma: xf.Loc
-    l: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    l: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_RadialBasisFunction, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_RadialBasisFunction, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma, l):
@@ -301,8 +301,8 @@ class Kernel_RadialBasisFunction(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -317,21 +317,21 @@ Kernel_SquaredExponential = Kernel_SE
 # ---------------------------------------------------------------
    
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_RationalQuadratic(typing.NamedTuple):
 
     # NOTE: https://www.cs.toronto.edu/~duvenaud/cookbook/
 
     # NOTE: as a -> inf, RQ -> RBF
 
-    sigma: xf.Loc
-    l: xf.Loc
-    a: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    l: xjd.Loc
+    a: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_RationalQuadratic, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_RationalQuadratic, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma, l, a):
@@ -344,8 +344,8 @@ class Kernel_RationalQuadratic(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -361,17 +361,17 @@ Kernel_RQ = Kernel_RationalQuadratic
 # ---------------------------------------------------------------
    
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Gaussian(typing.NamedTuple):
 
     # NOTE: https://francisbach.com/cursed-kernels/
 
-    sigma: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Gaussian, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Gaussian, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma):
@@ -381,8 +381,8 @@ class Kernel_Gaussian(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -392,17 +392,17 @@ class Kernel_Gaussian(typing.NamedTuple):
 # ---------------------------------------------------------------
    
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Exponential(typing.NamedTuple):
 
     # NOTE: https://francisbach.com/cursed-kernels/
 
-    sigma: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Exponential, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Exponential, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma):
@@ -412,8 +412,8 @@ class Kernel_Exponential(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -423,15 +423,15 @@ class Kernel_Exponential(typing.NamedTuple):
 # ---------------------------------------------------------------
    
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Laplacian(typing.NamedTuple):
 
-    sigma: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Exponential, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Exponential, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma):
@@ -441,8 +441,8 @@ class Kernel_Laplacian(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -452,17 +452,17 @@ class Kernel_Laplacian(typing.NamedTuple):
 # ---------------------------------------------------------------
    
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Cauchy(typing.NamedTuple):
 
     # NOTE: https://francisbach.com/cursed-kernels/
 
-    sigma: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Cauchy, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Cauchy, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma):
@@ -472,8 +472,8 @@ class Kernel_Cauchy(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -483,17 +483,17 @@ class Kernel_Cauchy(typing.NamedTuple):
 # ---------------------------------------------------------------
    
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Triangular(typing.NamedTuple):
 
     # NOTE: https://francisbach.com/cursed-kernels/
 
-    sigma: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Triangular, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Triangular, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma):
@@ -503,8 +503,8 @@ class Kernel_Triangular(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -516,15 +516,15 @@ class Kernel_Triangular(typing.NamedTuple):
 
 
 # TODO: and scale parameter?
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Sigmoid(typing.NamedTuple):
 
-    sigma: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Sigmoid, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Sigmoid, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma):
@@ -535,8 +535,8 @@ class Kernel_Sigmoid(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -547,15 +547,15 @@ class Kernel_Sigmoid(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 # TODO: and scale parameter?
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_Logistic(typing.NamedTuple):
 
-    sigma: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Logistic, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Logistic, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma):
@@ -566,8 +566,8 @@ class Kernel_Logistic(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)
@@ -578,18 +578,18 @@ class Kernel_Logistic(typing.NamedTuple):
 
         
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Kernel_OrnsteinUhlenbeck(typing.NamedTuple):
 
     # cov = σ^2 / 2θ * exp(−θ(x+y))(1−exp(2θ(x−y)))
     # theta -> sigma
 
-    sigma: xf.Loc
-    data: xf.Loc
+    sigma: xjd.Loc
+    data: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Kernel_Logistic, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Kernel_Logistic, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f(cls, data, sigma):
@@ -600,8 +600,8 @@ class Kernel_OrnsteinUhlenbeck(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         sigma = self.sigma.access(state)

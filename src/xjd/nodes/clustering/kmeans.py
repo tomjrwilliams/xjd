@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
@@ -42,23 +42,23 @@ def reindex_labels(labels):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class KMeans_Labels(typing.NamedTuple):
     
     k: int
-    mu: xf.Location
-    var: xf.Location
+    mu: xjd.Location
+    var: xjd.Location
 
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[KMeans_Labels, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[KMeans_Labels, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf
@@ -70,8 +70,8 @@ class KMeans_Labels(typing.NamedTuple):
         data = self.data.access(state)
 
         diffs = jax.numpy.subtract(
-            xf.expand_dims(data, -1, mu.shape[0]),
-            xf.expand_dims(mu.T, 0, data.shape[0]),
+            xjd.expand_dims(data, -1, mu.shape[0]),
+            xjd.expand_dims(mu.T, 0, data.shape[0]),
         )
         return jax.numpy.argmin(
             jax.numpy.square(diffs).sum(axis=1), axis=1
@@ -81,24 +81,24 @@ class KMeans_Labels(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class KMeans_EM_MeanDiff(typing.NamedTuple):
     
     k: int
 
-    mu: xf.Location
-    var: xf.Location
-    data: xf.Location
-    labels: xf.Location
+    mu: xjd.Location
+    var: xjd.Location
+    data: xjd.Location
+    labels: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[KMeans_EM_MeanDiff, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[KMeans_EM_MeanDiff, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf
@@ -111,7 +111,7 @@ class KMeans_EM_MeanDiff(typing.NamedTuple):
         mu = self.mu.access(state)
         var = self.var.access(state)
 
-        inds = xf.expand_dims(
+        inds = xjd.expand_dims(
             jax.numpy.linspace(
                 0, self.k, num=self.k, endpoint=False
             ),
@@ -120,7 +120,7 @@ class KMeans_EM_MeanDiff(typing.NamedTuple):
         )
 
         # very odd behaviour if we try to expand at -1
-        labs = xf.expand_dims(labels, 1, self.k)
+        labs = xjd.expand_dims(labels, 1, self.k)
 
         one_hot = jax.numpy.isclose(
             labs,
@@ -130,8 +130,8 @@ class KMeans_EM_MeanDiff(typing.NamedTuple):
 
         neg_hot = 1 + (-1 * one_hot)
 
-        data_mu = xf.expand_dims(mu.T, 0, data.shape[0])
-        data_exp = xf.expand_dims(data, -1, self.k,)
+        data_mu = xjd.expand_dims(mu.T, 0, data.shape[0])
+        data_exp = xjd.expand_dims(data, -1, self.k,)
 
         delta_mu_diff = jax.numpy.subtract(data_exp, data_mu)
 
@@ -149,22 +149,22 @@ class KMeans_EM_MeanDiff(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class KMeans_EM_Naive(typing.NamedTuple):
     
     k: int
 
-    data: xf.Location
-    labels: xf.Location
+    data: xjd.Location
+    labels: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[KMeans_EM_Naive, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[KMeans_EM_Naive, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf
@@ -174,7 +174,7 @@ class KMeans_EM_Naive(typing.NamedTuple):
         labels = self.labels.access(state)
         # label: n_data
 
-        inds = xf.expand_dims(
+        inds = xjd.expand_dims(
             jax.numpy.linspace(
                 0, self.k, num=self.k, endpoint=False
             ),
@@ -183,7 +183,7 @@ class KMeans_EM_Naive(typing.NamedTuple):
         )
 
         # very odd behaviour if we try to expand at -1
-        labs = xf.expand_dims(labels, 1, self.k)
+        labs = xjd.expand_dims(labels, 1, self.k)
 
         one_hot = jax.numpy.isclose(
             labs,
@@ -191,7 +191,7 @@ class KMeans_EM_Naive(typing.NamedTuple):
         )
         # n_data, n_clusters
         
-        counts = xf.expand_dims(
+        counts = xjd.expand_dims(
             one_hot.sum(axis=0) + 1, 
             axis=0, 
             size=data.shape[1],
@@ -199,11 +199,11 @@ class KMeans_EM_Naive(typing.NamedTuple):
 
         # n_data, n_col, n_clusters
 
-        one_hot = xf.expand_dims(one_hot, 1, data.shape[1])
+        one_hot = xjd.expand_dims(one_hot, 1, data.shape[1])
         # n_data, (n_col), n_cluster: boolean
 
         data_labelled = jax.numpy.multiply(
-            xf.expand_dims(data, -1, self.k,),
+            xjd.expand_dims(data, -1, self.k,),
             one_hot,
         )
 

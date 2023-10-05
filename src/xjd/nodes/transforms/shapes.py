@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
@@ -36,19 +36,19 @@ from ... import xfactors as xf
 
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Stack(typing.NamedTuple):
     
     locs: xt.iTuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Stack, tuple, xf.SiteValue]: ...    
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Stack, tuple, xjd.SiteValue]: ...    
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
@@ -57,19 +57,19 @@ class Stack(typing.NamedTuple):
 
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class UnStack(typing.NamedTuple):
     
-    loc: xf.Location
+    loc: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[UnStack, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[UnStack, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
@@ -80,37 +80,37 @@ class UnStack(typing.NamedTuple):
 
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Flatten(typing.NamedTuple):
     
     locs: xt.iTuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Flatten, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Flatten, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class UnFlatten(typing.NamedTuple):
     
-    loc: xf.Location
+    loc: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[UnFlatten, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[UnFlatten, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self
@@ -122,20 +122,20 @@ class UnFlatten(typing.NamedTuple):
 
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Concatenate(typing.NamedTuple):
     
     axis: int
-    loc: xf.Loc
+    loc: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Concatenate, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Concatenate, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.loc.access(state)
@@ -147,19 +147,19 @@ class Concatenate(typing.NamedTuple):
 
 # given shape definitions, can slice back out into tuple
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class UnConcatenate(typing.NamedTuple):
     
-    loc: xf.Location
+    loc: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[UnConcatenate, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[UnConcatenate, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert False, self

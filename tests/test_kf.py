@@ -7,25 +7,25 @@ import jax
 import optax
 
 import xtuples as xt
-import xfactors as xf
+import xjd
 
 
 # jax.config.update("jax_debug_nans", True)
 
 def test_kf() -> bool:
-    xf.utils.rand.reset_keys()
+    xjd.utils.rand.reset_keys()
 
     N = 100
 
-    ds = xf.utils.dates.starting(datetime.date(2020, 1, 1), N)
+    ds = xjd.utils.dates.starting(datetime.date(2020, 1, 1), N)
 
-    process = numpy.array(xf.utils.rand.gaussian((N,)))
-    v_series = xf.utils.dates.dated_series({
+    process = numpy.array(xjd.utils.rand.gaussian((N,)))
+    v_series = xjd.utils.dates.dated_series({
         d: v for d, v in zip(ds, process) #
     })
     # .rolling("5D").mean().fillna(0)
 
-    noise = xf.utils.rand.gaussian((N,)) / 3
+    noise = xjd.utils.rand.gaussian((N,)) / 3
 
     factors = (
         pandas.DataFrame({
@@ -41,49 +41,49 @@ def test_kf() -> bool:
     )
 
     N_COLS = 3
-    # betas = xf.utils.rand.gaussian((1, N_COLS,))
-    betas = xf.utils.rand.gaussian((2, N_COLS,))
+    # betas = xjd.utils.rand.gaussian((1, N_COLS,))
+    betas = xjd.utils.rand.gaussian((2, N_COLS,))
     # betas = numpy.vstack([
     #     numpy.zeros(betas.shape),
     #     betas,
     # ])
 
     vs = numpy.matmul(factors[0].values, betas)
-    v_noise = xf.utils.rand.gaussian(vs.shape) / 3
+    v_noise = xjd.utils.rand.gaussian(vs.shape) / 3
 
     vs = vs + v_noise
 
     data = (
         pandas.DataFrame({
-            f: xf.utils.dates.dated_series({
+            f: xjd.utils.dates.dated_series({
                 d: v for d, v in zip(ds, fvs) #
             })
             for f, fvs in enumerate(numpy.array(vs).T)
         }),
     )
 
-    model = xf.Model()
+    model = xjd.Model()
     model, loc_data = model.add_node(
-        xf.inputs.dfs.DataFrame_Wide(),
+        xjd.inputs.dfs.DataFrame_Wide(),
         input=True,
     )
 
     model, loc_noise = model.add_node(
-        xf.params.random.Gaussian((N + 1, 2,))
+        xjd.params.random.Gaussian((N + 1, 2,))
     )
     model, loc_state = model.add_node(
-        xf.params.random.Gaussian((N + 1, 2,))
+        xjd.params.random.Gaussian((N + 1, 2,))
     )
     # model, loc_cov = model.add_node(
-    #     xf.params.scalar.Scalar(
-    #         xf.expand_dims(jax.numpy.eye(2), 0, N+1)
+    #     xjd.params.scalar.Scalar(
+    #         xjd.expand_dims(jax.numpy.eye(2), 0, N+1)
     #     )
     # )
     model, loc_transition_raw = model.add_node(
-        xf.params.random.Gaussian((2, 2,))
+        xjd.params.random.Gaussian((2, 2,))
     )
     model, loc_transition_mask = model.add_node(
-        xf.transforms.masks.Zero(
+        xjd.transforms.masks.Zero(
             loc_transition_raw.param(),
             numpy.array([
                 [0., 0.],
@@ -92,7 +92,7 @@ def test_kf() -> bool:
         )
     )
     model, loc_transition = model.add_node(
-        xf.transforms.masks.Positive(
+        xjd.transforms.masks.Positive(
             loc_transition_mask.result(),
             numpy.array([
                 [0., 1.],
@@ -101,10 +101,10 @@ def test_kf() -> bool:
         )
     )
     model, loc_observation_raw = model.add_node(
-        xf.params.random.Gaussian((N_COLS, 2,))
+        xjd.params.random.Gaussian((N_COLS, 2,))
     )
     model, loc_observation_pos = model.add_node(
-        xf.transforms.masks.Positive(
+        xjd.transforms.masks.Positive(
             loc_observation_raw.param(),
             numpy.array([
                 [0, 0, 0],
@@ -113,7 +113,7 @@ def test_kf() -> bool:
         )
     )
     model, loc_observation = model.add_node(
-        xf.transforms.masks.Negative(
+        xjd.transforms.masks.Negative(
             loc_observation_pos.result(),
             numpy.array([
                 [1, 1, 1],
@@ -123,78 +123,78 @@ def test_kf() -> bool:
     )
     
     model, loc_state_eigvec_raw = model.add_node(
-        xf.params.scalar.Scalar(
-            xf.expand_dims(numpy.eye(2), 0, N+1)
+        xjd.params.scalar.Scalar(
+            xjd.expand_dims(numpy.eye(2), 0, N+1)
         )
     )
     model, loc_noise_state_eigvec_raw = model.add_node(
-        xf.params.scalar.Scalar(numpy.eye(2))
+        xjd.params.scalar.Scalar(numpy.eye(2))
     )
     model, loc_noise_obs_eigvec_raw = model.add_node(
-        xf.params.scalar.Scalar(numpy.eye(3))
+        xjd.params.scalar.Scalar(numpy.eye(3))
     )
 
     model, loc_state_eigvec = model.add_node(
-        xf.transforms.scaling.UnitNorm(
+        xjd.transforms.scaling.UnitNorm(
             loc_state_eigvec_raw.param(),
         )
     )
     model, loc_noise_state_eigvec = model.add_node(
-        xf.transforms.scaling.UnitNorm(
+        xjd.transforms.scaling.UnitNorm(
             loc_noise_state_eigvec_raw.param(),
         )
     )
     model, loc_noise_obs_eigvec = model.add_node(
-        xf.transforms.scaling.UnitNorm(
+        xjd.transforms.scaling.UnitNorm(
             loc_noise_obs_eigvec_raw.param(),
         )
     )
 
 
     model, loc_state_eigval_raw = model.add_node(
-        xf.params.random.Gaussian((N+1, 2,))
+        xjd.params.random.Gaussian((N+1, 2,))
     )
     model, loc_noise_state_eigval_raw = model.add_node(
-        xf.params.random.Gaussian((2,))
+        xjd.params.random.Gaussian((2,))
     )
     model, loc_noise_obs_eigval_raw = model.add_node(
-        xf.params.random.Gaussian((3,))
+        xjd.params.random.Gaussian((3,))
     )
     model, loc_state_eigval = model.add_node(
-        xf.transforms.scaling.Sq(
+        xjd.transforms.scaling.Sq(
             loc_state_eigval_raw.param(),
             vmin=0.01
         )
     )
     model, loc_noise_state_eigval = model.add_node(
-        xf.transforms.scaling.Sq(
+        xjd.transforms.scaling.Sq(
             loc_noise_state_eigval_raw.param(),
             vmin=0.01
         )
     )
     model, loc_noise_obs_eigval = model.add_node(
-        xf.transforms.scaling.Sq(
+        xjd.transforms.scaling.Sq(
             loc_noise_obs_eigval_raw.param(),
             vmin=0.01
         )
     )
 
     model, loc_cov = model.add_node(
-        xf.transforms.linalg.Eigen_Cov(
+        xjd.transforms.linalg.Eigen_Cov(
             loc_state_eigval.result(),
             loc_state_eigvec.result(),
             # vmax=3.,
         )
     )
     model, loc_noise_state = model.add_node(
-        xf.transforms.linalg.Eigen_Cov(
+        xjd.transforms.linalg.Eigen_Cov(
             loc_noise_state_eigval.result(),
             loc_noise_state_eigvec.result(),
             # vmax=3.,
         )
     )
     model, loc_noise_obs = model.add_node(
-        xf.transforms.linalg.Eigen_Cov(
+        xjd.transforms.linalg.Eigen_Cov(
             loc_noise_obs_eigval.result(),
             loc_noise_obs_eigvec.result(),
             # vmax=3.,
@@ -202,7 +202,7 @@ def test_kf() -> bool:
     )
 
     model, loc_state_pred = model.add_node(
-        xf.forecasting.kf.State_Prediction(
+        xjd.forecasting.kf.State_Prediction(
             transition=loc_transition.result(),
             state=loc_state.param(),
             noise=loc_noise.param(),
@@ -211,35 +211,35 @@ def test_kf() -> bool:
         ),
     )
     model, loc_cov_pred = model.add_node(
-        xf.forecasting.kf.Cov_Prediction(
+        xjd.forecasting.kf.Cov_Prediction(
             transition=loc_transition.result(),
             cov=loc_cov.result(),
             noise=loc_noise_state.result()
         )
     )
     model, loc_state_inn = model.add_node(
-        xf.forecasting.kf.State_Innovation(
+        xjd.forecasting.kf.State_Innovation(
             data=loc_data.result(),
             observation=loc_observation.result(),
             state=loc_state_pred.result(1),
         )
     )
     model, loc_cov_inn = model.add_node(
-        xf.forecasting.kf.Cov_Innovation(
+        xjd.forecasting.kf.Cov_Innovation(
             observation=loc_observation.result(),
             cov=loc_cov_pred.result(0),
             noise = loc_noise_obs.result(),
         ),
     )
     model, loc_kg = model.add_node(
-        xf.forecasting.kf.Kalman_Gain(
+        xjd.forecasting.kf.Kalman_Gain(
             observation=loc_observation.result(),
             cov=loc_cov_pred.result(0),
             cov_innovation=loc_cov_inn.result(),
         ),
     )
     model, loc_state_new = model.add_node(
-        xf.forecasting.kf.State_Updated(
+        xjd.forecasting.kf.State_Updated(
             state=loc_state_pred.result(1),
             kalman_gain=loc_kg.result(),
             state_innovation=loc_state_inn.result(),
@@ -247,7 +247,7 @@ def test_kf() -> bool:
         # markov=loc_state.param(),
     )
     model, loc_cov_new = model.add_node(
-        xf.forecasting.kf.Cov_Updated(
+        xjd.forecasting.kf.Cov_Updated(
             kalman_gain=loc_kg.result(),
             observation=loc_observation.result(),
             cov=loc_cov_pred.result(0),
@@ -256,7 +256,7 @@ def test_kf() -> bool:
     )
 
     model, loc_residual = model.add_node(
-        xf.forecasting.kf.Residual(
+        xjd.forecasting.kf.Residual(
             data=loc_data.result(),
             observation=loc_observation.result(),
             state=loc_state_new.result(),
@@ -267,13 +267,13 @@ def test_kf() -> bool:
 
     model = (
         model.add_node(
-            xf.constraints.loss.L2(
+            xjd.constraints.loss.L2(
                 loc_state_inn.result(),
             ),
             constraint=True,
         )
         .add_node(
-            xf.constraints.loss.MSE(
+            xjd.constraints.loss.MSE(
                 loc_cov_pred.result(1),
                 loc_noise_state.result(),
                 # mse(next - pred, noise)
@@ -281,31 +281,31 @@ def test_kf() -> bool:
             constraint=True,
         )
         .add_node(
-            xf.constraints.loss.L2(
+            xjd.constraints.loss.L2(
                 loc_state_pred.result(2),
             ),
             constraint=True,
         )
         .add_node(
-            xf.constraints.loss.L2(
+            xjd.constraints.loss.L2(
                 loc_noise_obs_eigval.result(),
             ),
             constraint=True,
         )
         .add_node(
-            xf.constraints.linalg.Orthonormal(
+            xjd.constraints.linalg.Orthonormal(
                 loc_state_eigvec.result(),
             ),
             constraint=True,
         )
         .add_node(
-            xf.constraints.linalg.Orthonormal(
+            xjd.constraints.linalg.Orthonormal(
                 loc_noise_state_eigvec.result(),
             ),
             constraint=True,
         )
         .add_node(
-            xf.constraints.linalg.Orthonormal(
+            xjd.constraints.linalg.Orthonormal(
                 loc_noise_obs_eigvec.result(),
             ),
             constraint=True,
@@ -360,10 +360,10 @@ def test_kf() -> bool:
         state,
         data[0].values,
         numpy.matmul(
-            observation.T, xf.expand_dims(state, -1, 1)
+            observation.T, xjd.expand_dims(state, -1, 1)
         )[:, :, 0],
         numpy.matmul(
-            observation.T, xf.expand_dims(state_pred, -1, 1)
+            observation.T, xjd.expand_dims(state_pred, -1, 1)
         )[:, :, 0]
     ], axis=1)
 
@@ -373,7 +373,7 @@ def test_kf() -> bool:
     max_digits = len("%.2f" % numpy.max(numpy.abs(deltas)))
 
     f_round = lambda v, n, bounds: " ".join([
-        xf.visuals.formatting.left_pad(
+        xjd.visuals.formatting.left_pad(
             ('%' + ".{}f".format(n)) % round(_v, n),
             max_digits,
             "0"
@@ -402,9 +402,9 @@ def test_kf() -> bool:
         ),
     }.items(): print(k, v)
 
-    xf.utils.tests.assert_is_close(betas, observation, atol=.1)
-    xf.utils.tests.assert_is_close(
-        xf.utils.funcs.to_diag(v_var), noise_obs, atol=.1
+    xjd.utils.tests.assert_is_close(betas, observation, atol=.1)
+    xjd.utils.tests.assert_is_close(
+        xjd.utils.funcs.to_diag(v_var), noise_obs, atol=.1
     )
 
     assert False

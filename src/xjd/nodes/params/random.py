@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 from ... import utils
 
 # ---------------------------------------------------------------
@@ -35,8 +35,8 @@ class RandomCovariance(typing.NamedTuple):
     d: int
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[RandomCovariance, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[RandomCovariance, tuple, xjd.SiteValue]:
         shape = (self.d, self.d)
         gaussians = [
             utils.rand.gaussian(shape=shape)
@@ -49,8 +49,8 @@ class RandomCovariance(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -69,14 +69,14 @@ class Uniform(typing.NamedTuple):
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Uniform, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Uniform, tuple, xjd.SiteValue]:
         return self,self.shape,  utils.rand.uniform(self.shape)
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -89,13 +89,13 @@ class Uniform(typing.NamedTuple):
 @xt.nTuple.decorate()
 class VUniform(typing.NamedTuple):
 
-    data: xf.Location
+    data: xjd.Location
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VUniform, tuple, xf.SiteValue]:
-        shape = xt.iTuple(self.data.access(model, into=xf.Site))
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VUniform, tuple, xjd.SiteValue]:
+        shape = xt.iTuple(self.data.access(model, into=xjd.Site))
         return self, (
             shape.map(lambda _: self.shape)
         ), (
@@ -104,8 +104,8 @@ class VUniform(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -124,8 +124,8 @@ class Orthogonal(typing.NamedTuple):
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Orthogonal, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Orthogonal, tuple, xjd.SiteValue]:
         s = self.shape
         if len(s) == 2:
             return self, self.shape, utils.rand.orthogonal(
@@ -142,8 +142,8 @@ class Orthogonal(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -165,14 +165,14 @@ class Gaussian(typing.NamedTuple):
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Gaussian, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Gaussian, tuple, xjd.SiteValue]:
         return self,self.shape,  utils.rand.gaussian(self.shape)
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -185,13 +185,13 @@ class Gaussian(typing.NamedTuple):
 @xt.nTuple.decorate()
 class VGaussian(typing.NamedTuple):
 
-    data: xf.Location
+    data: xjd.Location
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VGaussian, tuple, xf.SiteValue]:
-        shape = xt.iTuple(self.data.access(model, into=xf.Site))
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VGaussian, tuple, xjd.SiteValue]:
+        shape = xt.iTuple(self.data.access(model, into=xjd.Site))
         return self, (
             shape.map(lambda _: self.shape)
         ), (
@@ -200,8 +200,8 @@ class VGaussian(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -220,8 +220,8 @@ class GaussianSoftmax(typing.NamedTuple):
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[GaussianSoftmax, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[GaussianSoftmax, tuple, xjd.SiteValue]:
         return self, self.shape, jax.nn.softmax(
             utils.rand.gaussian(self.shape),
             axis=-1
@@ -229,8 +229,8 @@ class GaussianSoftmax(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -251,14 +251,14 @@ class Beta(typing.NamedTuple):
     shape: tuple
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Beta, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Beta, tuple, xjd.SiteValue]:
         return self, self.shape, utils.rand.beta(self.a, self.b, self.shape)
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None

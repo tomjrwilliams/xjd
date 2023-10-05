@@ -22,28 +22,28 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 
 from . import vanilla
 
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Parametric_Factor(typing.NamedTuple):
     
-    features: xf.Location
-    params: xf.Location
+    features: xjd.Location
+    params: xjd.Location
     # or an operator for the function, which can have its own params site? probably that
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Parametric_Factor, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Parametric_Factor, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
 

@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
@@ -32,15 +32,15 @@ class Scalar(typing.NamedTuple):
     v: numpy.ndarray
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Scalar, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Scalar, tuple, xjd.SiteValue]:
         # TODO
         return self, (), jax.numpy.array(self.v)
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None
@@ -53,13 +53,13 @@ class Scalar(typing.NamedTuple):
 @xt.nTuple.decorate()
 class VScalar(typing.NamedTuple):
 
-    data: xf.Location
+    data: xjd.Location
     v: numpy.ndarray
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[VScalar, tuple, xf.SiteValue]:
-        target: xf.Site = self.data.access(model, into=xf.Site)
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[VScalar, tuple, xjd.SiteValue]:
+        target: xjd.Site = self.data.access(model, into=xjd.Site)
         assert target.shape is not None # sigh, oh mypy
         n = len(target.shape)
         return self, tuple(
@@ -70,8 +70,8 @@ class VScalar(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert site.loc is not None

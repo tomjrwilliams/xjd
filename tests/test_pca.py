@@ -5,21 +5,21 @@ import numpy
 import pandas
 
 import xtuples as xt
-import xfactors as xf
+import xjd
 
 
 def test_pca() -> bool:
-    xf.utils.rand.reset_keys()
+    xjd.utils.rand.reset_keys()
 
-    ds = xf.utils.dates.starting(datetime.date(2020, 1, 1), 100)
+    ds = xjd.utils.dates.starting(datetime.date(2020, 1, 1), 100)
 
-    vs_norm = xf.utils.rand.gaussian((100, 3,))
-    betas = xf.utils.rand.gaussian((3, 5,))
+    vs_norm = xjd.utils.rand.gaussian((100, 3,))
+    betas = xjd.utils.rand.gaussian((3, 5,))
     vs = numpy.matmul(vs_norm, betas)
 
     data = (
         pandas.DataFrame({
-            f: xf.utils.dates.dated_series({
+            f: xjd.utils.dates.dated_series({
                 d: v for d, v in zip(ds, fvs)
                 #
             })
@@ -27,12 +27,12 @@ def test_pca() -> bool:
         }),
     )
 
-    model, loc_data = xf.Model().add_node(
-        xf.inputs.dfs.DataFrame_Wide(),
+    model, loc_data = xjd.Model().add_node(
+        xjd.inputs.dfs.DataFrame_Wide(),
         input=True,
     )
     model, loc_pca = model.add_node(
-        xf.pca.vanilla.PCA(n=3, data = loc_data.result())
+        xjd.pca.vanilla.PCA(n=3, data = loc_data.result())
     )
     model = model.init(data)
 
@@ -47,12 +47,12 @@ def test_pca() -> bool:
 
     # multiply by root(eigenval) -> beta?
 
-    xf.utils.tests.assert_is_close(
+    xjd.utils.tests.assert_is_close(
         eigen_val[:3],
         eigvals.real[:3],
         True,
     )
-    xf.utils.tests.assert_is_close(
+    xjd.utils.tests.assert_is_close(
         eigen_vec.real[..., :3],
         eigvecs.real[..., :3],
         True,

@@ -1,0 +1,1 @@
+XTUPLES = "C:/hc/xtuples/src"

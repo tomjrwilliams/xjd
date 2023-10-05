@@ -22,7 +22,7 @@ import optax
 
 import xtuples as xt
 
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
@@ -38,25 +38,25 @@ from ... import xfactors as xf
 
 # ---------------------------------------------------------------
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Prediction(typing.NamedTuple):
     
-    position: xf.Loc
-    velocity: xf.Loc
+    position: xjd.Loc
+    velocity: xjd.Loc
 
-    delta_t: xf.OptionalLoc = None
+    delta_t: xjd.OptionalLoc = None
 
-    # alpha: xf.Loc
-    # beta: xf.Loc
+    # alpha: xjd.Loc
+    # beta: xjd.Loc
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Prediction, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Prediction, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         position = self.position.access(state)
@@ -72,27 +72,27 @@ class Prediction(typing.NamedTuple):
             position[..., 1:, :] + (velocity * delta_t)
         ])
     
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class Update(typing.NamedTuple):
     
-    position: xf.Loc
+    position: xjd.Loc
 
-    prediction: xf.Loc
-    velocity: xf.Loc
+    prediction: xjd.Loc
+    velocity: xjd.Loc
 
-    alpha: xf.Loc
-    beta: xf.Loc
+    alpha: xjd.Loc
+    beta: xjd.Loc
 
-    delta_t: xf.OptionalLoc = None
+    delta_t: xjd.OptionalLoc = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[Update, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[Update, tuple, xjd.SiteValue]: ...
     
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
 

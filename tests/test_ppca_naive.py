@@ -6,42 +6,42 @@ import pandas
 import jax
 
 import xtuples as xt
-import xfactors as xf
+import xjd
 
 
 def test_ppca_naive() -> bool:
-    xf.utils.rand.reset_keys()
+    xjd.utils.rand.reset_keys()
 
     N = 3
 
-    ds = xf.utils.dates.starting(datetime.date(2020, 1, 1), 100)
+    ds = xjd.utils.dates.starting(datetime.date(2020, 1, 1), 100)
 
     N_COLS = 5
 
-    vs_norm = xf.utils.rand.gaussian((100, N,))
-    betas = xf.utils.rand.gaussian((N, N_COLS,))
+    vs_norm = xjd.utils.rand.gaussian((100, N,))
+    betas = xjd.utils.rand.gaussian((N, N_COLS,))
     vs = numpy.matmul(vs_norm, betas)
 
     NOISE = 1
 
     data = (
         pandas.DataFrame({
-            f: xf.utils.dates.dated_series({d: v for d, v in zip(ds, fvs)})
+            f: xjd.utils.dates.dated_series({d: v for d, v in zip(ds, fvs)})
             for f, fvs in enumerate(numpy.array(vs).T)
         }),
     )
 
-    model, loc_data = xf.Model().add_node(
-        xf.inputs.dfs.DataFrame_Wide(),
+    model, loc_data = xjd.Model().add_node(
+        xjd.inputs.dfs.DataFrame_Wide(),
         input=True,
     )
     model, loc_weights = model.add_node(
-        xf.params.random.Orthogonal(
+        xjd.params.random.Orthogonal(
             shape=(N_COLS, N + NOISE,)
         )
     )
     model, loc_encode = model.add_node(
-        xf.pca.vanilla.PCA_Encoder(
+        xjd.pca.vanilla.PCA_Encoder(
             data=loc_data.result(),
             weights = loc_weights.param(),
             n=N + NOISE,
@@ -49,18 +49,18 @@ def test_ppca_naive() -> bool:
         )
     )
     model, loc_decode = model.add_node(
-        xf.pca.vanilla.PCA_Decoder(
+        xjd.pca.vanilla.PCA_Decoder(
             weights = loc_weights.param(),
             factors=loc_encode.result(),
             #
         )
     )
     model = (
-        model.add_node(xf.constraints.loss.MSE(
+        model.add_node(xjd.constraints.loss.MSE(
             l=loc_data.result(),
             r=loc_decode.result(),
         ), constraint=True)
-        .add_node(xf.constraints.linalg.EigenVLike(
+        .add_node(xjd.constraints.linalg.EigenVLike(
             weights = loc_weights.param(),
             factors=loc_encode.result(),
             n_check=N + NOISE,
@@ -89,18 +89,18 @@ def test_ppca_naive() -> bool:
     eigvecs = eigvecs[..., _order]
     # assert False, (eigvals, eigen_vals,)
 
-    eigvecs = xf.utils.funcs.set_signs_to(
-        eigvecs, 0, numpy.ones(eigvecs.shape[0])
+    eigvecs = xjd.utils.funcs.set_signs_to(
+        eigvecs, 1, numpy.ones(eigvecs.shape[1])
     )
-    eigen_vec = xf.utils.funcs.set_signs_to(
-        eigen_vec, 0, numpy.ones(eigen_vec.shape[0])
+    eigen_vec = xjd.utils.funcs.set_signs_to(
+        eigen_vec, 1, numpy.ones(eigen_vec.shape[1])
     )
 
     print(eigen_vec)
     print(eigvecs)
 
     # for now we just check pc1 matches
-    xf.utils.tests.assert_is_close(
+    xjd.utils.tests.assert_is_close(
         eigen_vec.real[..., :1],
         eigvecs.real[..., :1],
         True,

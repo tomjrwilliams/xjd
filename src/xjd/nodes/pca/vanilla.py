@@ -24,7 +24,7 @@ import optax
 import xtuples as xt
 
 from ... import utils
-from ... import xfactors as xf
+from ... import xjd
 
 # ---------------------------------------------------------------
 
@@ -37,7 +37,7 @@ def calc_loadings(eigvals, eigvecs):
         #     jax.numpy.expand_dims(eigvals, 0),
         #     eigvecs.shape,
         # ),
-        xf.expand_dims_like(eigvals, axis=0, like=eigvecs),
+        xjd.expand_dims_like(eigvals, axis=0, like=eigvecs),
         eigvecs,
     )
 
@@ -47,11 +47,11 @@ def calc_loadings(eigvals, eigvecs):
 class PCA(typing.NamedTuple):
     
     n: int
-    data: xf.Location
+    data: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PCA, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PCA, tuple, xjd.SiteValue]:
         return self, (
             self.data.site().access(model).shape[1],
             self.n,
@@ -65,8 +65,8 @@ class PCA(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         data = self.data.access(state)
@@ -80,18 +80,18 @@ class PCA_Encoder(typing.NamedTuple):
     
     n: int
 
-    data: xf.Location
-    weights: xf.Location
+    data: xjd.Location
+    weights: xjd.Location
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PCA_Encoder, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PCA_Encoder, tuple, xjd.SiteValue]:
         return self, self.weights.site().access(model).shape, ()
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert self.weights is not None
@@ -104,19 +104,19 @@ class PCA_Encoder(typing.NamedTuple):
 @xt.nTuple.decorate()
 class PCA_Decoder(typing.NamedTuple):
 
-    factors: xf.Location
-    weights: xf.OptionalLocation = None
+    factors: xjd.Location
+    weights: xjd.OptionalLocation = None
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PCA_Decoder, tuple, xf.SiteValue]:
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PCA_Decoder, tuple, xjd.SiteValue]:
         # TODO
         return self, (), ()
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         assert self.weights is not None
@@ -128,12 +128,12 @@ class PCA_Decoder(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PPCA_NegLikelihood(typing.NamedTuple):
     
-    sigma: xf.Location
-    weights: xf.Location
-    cov: xf.Location
+    sigma: xjd.Location
+    weights: xjd.Location
+    cov: xjd.Location
 
     # ---
 
@@ -146,8 +146,8 @@ class PPCA_NegLikelihood(typing.NamedTuple):
     # so can be re-used in rolling
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PPCA_NegLikelihood, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PPCA_NegLikelihood, tuple, xjd.SiteValue]: ...
 
     @classmethod
     def f_apply(
@@ -185,8 +185,8 @@ class PPCA_NegLikelihood(typing.NamedTuple):
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://www.robots.ox.ac.uk/~cvrg/hilary2006/ppca.pdf
@@ -219,12 +219,12 @@ class PPCA_NegLikelihood(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PPCA_EM(typing.NamedTuple):
     
-    sigma: xf.Location
-    weights: xf.Location
-    cov: xf.Location
+    sigma: xjd.Location
+    weights: xjd.Location
+    cov: xjd.Location
 
     # ---
 
@@ -236,13 +236,13 @@ class PPCA_EM(typing.NamedTuple):
     # if we want
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PPCA_EM, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PPCA_EM, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://www.robots.ox.ac.uk/~cvrg/hilary2006/ppca.pdf
@@ -293,27 +293,27 @@ class PPCA_EM(typing.NamedTuple):
 # ---------------------------------------------------------------
 
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PPCA_Marginal_Observations(typing.NamedTuple):
     
-    sigma: xf.Location
-    weights: xf.Location
-    encoder: xf.Location
-    data: xf.Location
-    cov: xf.Location
+    sigma: xjd.Location
+    weights: xjd.Location
+    encoder: xjd.Location
+    data: xjd.Location
+    cov: xjd.Location
 
     # ---
 
     random: float = 0
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PPCA_Marginal_Observations, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PPCA_Marginal_Observations, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://www.robots.ox.ac.uk/~cvrg/hilary2006/ppca.pdf
@@ -343,27 +343,27 @@ class PPCA_Marginal_Observations(typing.NamedTuple):
 
 small = 10 ** -4
 
-@xt.nTuple.decorate(init=xf.init_null)
+@xt.nTuple.decorate(init=xjd.init_null)
 class PPCA_Conditional_Latents(typing.NamedTuple):
     
-    sigma: xf.Location
-    weights: xf.Location
-    encoder: xf.Location
-    data: xf.Location
-    cov: xf.Location
+    sigma: xjd.Location
+    weights: xjd.Location
+    encoder: xjd.Location
+    data: xjd.Location
+    cov: xjd.Location
 
     # ---
 
     random: float = 0
 
     def init(
-        self, site: xf.Site, model: xf.Model, data = None
-    ) -> tuple[PPCA_Conditional_Latents, tuple, xf.SiteValue]: ...
+        self, site: xjd.Site, model: xjd.Model, data = None
+    ) -> tuple[PPCA_Conditional_Latents, tuple, xjd.SiteValue]: ...
 
     def apply(
         self,
-        site: xf.Site,
-        state: xf.Model,
+        site: xjd.Site,
+        state: xjd.Model,
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         # https://www.robots.ox.ac.uk/~cvrg/hilary2006/ppca.pdf
