@@ -83,7 +83,7 @@ def test_kf() -> bool:
         xjd.params.random.Gaussian((2, 2,))
     )
     model, loc_transition_mask = model.add_node(
-        xjd.transforms.masks.Zero(
+        xjd.transforms.masks.Positive(
             loc_transition_raw.param(),
             numpy.array([
                 [0., 0.],
@@ -92,7 +92,7 @@ def test_kf() -> bool:
         )
     )
     model, loc_transition = model.add_node(
-        xjd.transforms.masks.Positive(
+        xjd.transforms.masks.Zero(
             loc_transition_mask.result(),
             numpy.array([
                 [0., 0.],
@@ -280,12 +280,12 @@ def test_kf() -> bool:
             ),
             constraint=True,
         )
-        .add_node(
-            xjd.constraints.loss.L2(
-                loc_state_pred.result(2),
-            ),
-            constraint=True,
-        )
+        # .add_node(
+        #     xjd.constraints.loss.L2(
+        #         loc_state_pred.result(2),
+        #     ),
+        #     constraint=True,
+        # )
         .add_node(
             xjd.constraints.loss.L2(
                 loc_noise_obs_eigval.result(),
@@ -324,7 +324,7 @@ def test_kf() -> bool:
     model = model.optimise(
         data, 
         iters = 2500,
-        max_error_unchanged=0.5,
+        # max_error_unchanged=0.5,
         rand_init=100,
         # opt = optax.sgd(.1),
         opt=optax.sgd(.1),
@@ -338,13 +338,27 @@ def test_kf() -> bool:
         loc_observation.result().access(model), 2
     ).T
 
+    # observation_unit = jax.numpy.abs(observation[..., 0])
+
+    # observation = observation / xjd.utils.shapes.expand_dims(
+    #     observation_unit, -1, observation.shape[-1]
+    # )
+
     noise_obs = numpy.round(
         loc_noise_obs.result().access(model), 2
     )
     noise_state = numpy.round(
         loc_noise_state.result().access(model), 2
     )
+    # noise_state = noise_state * xjd.utils.shapes.expand_dims(
+    #     observation_unit, -1, noise_state.shape[-1]
+    # )
 
+
+    # betas_unit = jax.numpy.abs(betas[..., 0])
+    # betas = betas / xjd.utils.shapes.expand_dims(
+    #     betas_unit, -1, betas.shape[-1]
+    # )
     betas = numpy.round(betas, 2)
 
     factor_var = numpy.var(factors[0].values, axis=0)

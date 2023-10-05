@@ -84,7 +84,7 @@ class Positive(typing.NamedTuple):
             mask = self.condition.access(state)
         else:
             mask = self.condition
-        return jax.numpy.where(mask, data_pos, data)
+        return where(mask, data_pos, data)
         
 @xt.nTuple.decorate(init=xjd.init_null)
 class Negative(typing.NamedTuple):
@@ -108,7 +108,7 @@ class Negative(typing.NamedTuple):
             mask = self.condition.access(state)
         else:
             mask = self.condition
-        return jax.numpy.where(mask, data_neg, data)
+        return where(mask, data_neg, data)
 
 # ---------------------------------------------------------------
 

@@ -50,9 +50,9 @@ class Eigenvec(typing.NamedTuple):
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         weights = self.weights.access(state)
         cov = self.cov.access(state)
-        eigvals = self.eigvals.access(state) + small
+        eigvals = self.eigvals.access(state) 
         if self.T:
-            weights = weights.T
+            weights = utils.shapes.transpose(weights)
         return utils.funcs.loss_eigenvec(cov, weights, eigvals)
 
 @xt.nTuple.decorate(init=xjd.init_null)
@@ -74,9 +74,9 @@ class Eigenvec_Cov(typing.NamedTuple):
         data = None,
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         weights = self.weights.access(state)
-        eigvals = self.eigvals.access(state) + small
+        eigvals = self.eigvals.access(state) 
         if self.T:
-            weights = weights.T
+            weights = utils.shapes.transpose(weights)
         if len(weights.shape) == 3:
             eigvals = xjd.expand_dims(eigvals, -1, 1)
         return utils.funcs.loss_eigenvec_norm(
