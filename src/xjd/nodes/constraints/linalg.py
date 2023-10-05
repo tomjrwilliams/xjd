@@ -101,7 +101,7 @@ class Orthonormal(typing.NamedTuple):
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         X = self.data.access(state)
         if self.T:
-            X = X.T
+            X = utils.shapes.transpose(X)
         return utils.funcs.loss_orthonormal(X)
 
 
@@ -123,7 +123,7 @@ class Orthogonal(typing.NamedTuple):
     ) -> typing.Union[tuple, jax.numpy.ndarray]:
         X = self.data.access(state)
         if self.T:
-            X = X.T
+            X = utils.shapes.transpose(X)
         return utils.funcs.loss_orthogonal(X)
 
 

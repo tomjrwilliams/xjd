@@ -18,7 +18,11 @@ pip install xjd
 
 ## Overview
 
-xjd (jax dag(s)) is a work-in-progress library for machine learning research built on [JAX](https://jax.readthedocs.io/en/latest/index.html).
+xjd is a work-in-progress library for machine learning research built on [JAX](https://jax.readthedocs.io/en/latest/index.html).
+
+x = prefix I use for my open source stuff (to make name conflicts with existing variables less likely)
+j = jax
+d = directed (acylic graphs), the structure of an ajd model.
 
 ### Pipelines
 

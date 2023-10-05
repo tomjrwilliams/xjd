@@ -76,8 +76,8 @@ def test_ab() -> bool:
             beta=loc_beta.result(),
         ),
         markov=xt.iTuple((
-            loc_position,
-            loc_velocity,
+            loc_position.param(),
+            loc_velocity.param(),
         )),
     )
     model = (

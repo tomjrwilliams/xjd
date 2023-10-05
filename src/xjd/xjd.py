@@ -309,23 +309,36 @@ LocationValue = typing.Union[Site, SiteValue]
 
 # ---
     
-def is_loc_field(annotation):
-    if isinstance(annotation, typing.ForwardRef):
-        return "Loc" in str(annotation)
-    if isinstance(annotation, type):
-        cls = annotation
-        return cls is Location or issubclass(cls, Location)
-    return Location in annotation.__args__
+# def is_loc_field(annotation):
+    # if isinstance(annotation, typing.ForwardRef):
+    #     return "Loc" in str(annotation)
+    # if isinstance(annotation, type):
+    #     cls = annotation
+    #     return cls is Location or issubclass(cls, Location)
+    # return Location in annotation.__args__
+
+def is_loc_field(k, node):
+    try:
+        site = getattr(node, k).site()
+        return True
+    except:
+        return False
 
 def loc_fields(node: Node):
     return {
         k: ann for k, ann in type(node).__annotations__.items()
-        if is_loc_field(ann)
+        if is_loc_field(k, node)
     }
+
+def access_site(node, k, model):
+    try:
+        return getattr(node, k).site().access(model)
+    except:
+        assert False, [k, node]
 
 def access_sites(node: Node, model: Model):
     sites = {
-        k: getattr(node, k).site().access(model)
+        k: access_site(node, k, model)
         for k, _ in loc_fields(node).items()
         if getattr(node, k) is not None
     }
@@ -774,7 +787,11 @@ def get_markov_res(s, markov, order, params):
     elif isinstance(m, (tuple, xt.iTuple)):
         if isinstance(m, tuple):
             m = xt.iTuple(m)
-        assert len(m) == len(res), dict(m=len(m), res=len(res))
+        assert len(m) == len(res), dict(
+            m=len(m), 
+            res=len(res),
+            res_v=res,
+        )
         return m.zip(res).filterstar(
             lambda loc, _res: loc is not None
         ).mapstar(
@@ -907,11 +924,18 @@ def optimise_model(
     markov_sites = model.sites.filter(lambda s: s.markov)
     markov_i = get_markov_sites(markov_sites, model.order)
 
-    # init with the starting param values (of the masked site)
+    # init with the starting param values (of the masked site(s))
     if markov_sites.len():
         markov = {
-            site.loc: rec_detach(
-                model.sites[i].loc.param().access(model)
+            site.loc: (
+                rec_detach(
+                    model.sites[i].loc.param().access(model)
+                )
+                if isinstance(site.markov, Location)
+                else tuple(
+                    model.sites[_i].loc.param().access(model)
+                    for _i in get_markov_site(site, model.order)
+                )
             )
             for i, site in markov_i.zip(markov_sites)
         }

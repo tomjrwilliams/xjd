@@ -49,6 +49,18 @@ class Zero(typing.NamedTuple):
             self.v
         )
 
+# ---------------------------------------------------------------
+
+def where(mask, if_yes, if_no):
+    not_mask = 1 + (mask * -1.)
+    return jax.numpy.multiply(
+        mask, if_yes
+    ) + jax.numpy.multiply(
+        not_mask, if_no
+    )
+
+# ---------------------------------------------------------------
+
 
 @xt.nTuple.decorate(init=xjd.init_null)
 class Positive(typing.NamedTuple):

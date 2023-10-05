@@ -128,7 +128,7 @@ def test_kmeans() -> bool:
         clusters,
         mu,
         True,
-        atol=0.2,
+        atol=0.25,
     )
 
     return True

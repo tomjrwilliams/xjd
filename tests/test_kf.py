@@ -95,7 +95,7 @@ def test_kf() -> bool:
         xjd.transforms.masks.Positive(
             loc_transition_mask.result(),
             numpy.array([
-                [0., 1.],
+                [0., 0.],
                 [1., 1.]
             ])
         )
@@ -124,14 +124,14 @@ def test_kf() -> bool:
     
     model, loc_state_eigvec_raw = model.add_node(
         xjd.params.scalar.Scalar(
-            xjd.expand_dims(numpy.eye(2), 0, N+1)
+            xjd.expand_dims(jax.numpy.eye(2), 0, N+1)
         )
     )
     model, loc_noise_state_eigvec_raw = model.add_node(
-        xjd.params.scalar.Scalar(numpy.eye(2))
+        xjd.params.scalar.Scalar(jax.numpy.eye(2))
     )
     model, loc_noise_obs_eigvec_raw = model.add_node(
-        xjd.params.scalar.Scalar(numpy.eye(3))
+        xjd.params.scalar.Scalar(jax.numpy.eye(3))
     )
 
     model, loc_state_eigvec = model.add_node(
@@ -373,7 +373,7 @@ def test_kf() -> bool:
     max_digits = len("%.2f" % numpy.max(numpy.abs(deltas)))
 
     f_round = lambda v, n, bounds: " ".join([
-        xjd.visuals.formatting.left_pad(
+        xjd.utils.formatting.left_pad(
             ('%' + ".{}f".format(n)) % round(_v, n),
             max_digits,
             "0"
